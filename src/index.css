@@ -316,6 +316,7 @@ input {
 .giant-emoji {
   margin: 0;
   font-size: 72px;
+  line-height: 1.1;
   text-align: center;
 }
 
@@ -324,89 +325,6 @@ input {
   text-align: center;
   font-size: 76px;
   font-weight: 800;
-}
-
-.reveal-screen {
-  overflow: hidden;
-  position: relative;
-}
-
-.reveal-under-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-
-.reveal-role-content {
-  min-height: 100dvh;
-  padding: 52px 20px 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-}
-
-.revealed-panel {
-  width: 100%;
-  min-height: 200px;
-  border-radius: 20px;
-  background: #0a1020;
-  border: 1px solid #ffffff20;
-  padding: 16px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-}
-
-.secret-word {
-  margin: 0;
-  text-align: center;
-  line-height: 1.2;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.hint-title,
-.impostor-list {
-  margin: 0;
-  text-align: center;
-}
-
-.remember-block,
-.swipe-hint {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-}
-
-.reveal-cover {
-  z-index: 10;
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, #0f1020, #171b34);
-  display: grid;
-  place-content: center;
-  text-align: center;
-  gap: 6px;
-  touch-action: none;
-}
-
-.lock {
-  font-size: 56px;
-  margin: 0;
-}
-
-.close-btn {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  z-index: 25;
-  font-size: 20px;
 }
 
 .score-row {
@@ -443,6 +361,10 @@ input {
   background: transparent;
 }
 
+/* ==========================================================
+   Reveal role screen — fixed layering and mobile drag
+   ========================================================== */
+
 .reveal-screen {
   height: 100dvh;
   min-height: 100dvh;
@@ -473,9 +395,10 @@ input {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 24px 24px 120px;
+  padding: 24px 24px calc(env(safe-area-inset-bottom, 0px) + 86px);
   background: linear-gradient(180deg, #0f1020 0%, #161936 55%, #1a1d3a 100%);
   overflow: hidden;
+  pointer-events: none;
 }
 
 .reveal-role-content {
@@ -487,16 +410,17 @@ input {
 .revealed-panel {
   width: 100%;
   border-radius: 26px;
-  padding: 26px 18px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  padding: 28px 18px;
+  background: rgba(255, 255, 255, 0.052);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.26);
+  text-align: center;
 }
 
 .revealed-panel h2 {
   margin: 8px 0;
   font-size: clamp(34px, 10vw, 52px);
-  line-height: 1.12;
+  line-height: 1.14;
   font-weight: 800;
   text-align: center;
   overflow-wrap: anywhere;
@@ -532,12 +456,6 @@ input {
   line-height: 1.15;
   font-weight: 800;
   overflow-wrap: anywhere;
-}
-
-.giant-emoji {
-  margin: 0;
-  font-size: 64px;
-  line-height: 1.1;
 }
 
 .reveal-cover {
