@@ -1,39 +1,76 @@
 ﻿import type { Player, RoundResult, SecretWord } from './types'
 
-export function scoreVotes(players: Player[], impostorIds: Set<string>, selectedPlayerIds: Set<string>, word: SecretWord): { players: Player[]; result: RoundResult } {
-  const allCorrect = eqSet(impostorIds, selectedPlayerIds)
+const setsEqual = (left: Set<string>, right: Set<string>): boolean =>
+  left.size === right.size && [...left].every((v) => right.has(v))
+
+export function scoreVotes(
+  players: Player[],
+  impostorIds: Set<string>,
+  selectedPlayerIds: Set<string>,
+  secretWord: SecretWord,
+): { players: Player[]; result: RoundResult } {
+  const allCorrect = setsEqual(selectedPlayerIds, impostorIds)
   const delta: Record<string, number> = {}
-  for (const p of players) {
-    delta[p.id] = allCorrect ? (impostorIds.has(p.id) ? 0 : 1) : (impostorIds.has(p.id) && !selectedPlayerIds.has(p.id) ? 1 : 0)
+
+  if (allCorrect) {
+    for (const p of players) {
+      delta[p.id] = impostorIds.has(p.id) ? 0 : 1
+    }
+  } else {
+    for (const p of players) {
+      delta[p.id] = impostorIds.has(p.id) && !selectedPlayerIds.has(p.id) ? 1 : 0
+    }
   }
+
+  const updatedPlayers = players.map((p) => ({ ...p, score: p.score + (delta[p.id] ?? 0) }))
+
   return {
-    players: players.map((p) => ({ ...p, score: p.score + (delta[p.id] ?? 0) })),
+    players: updatedPlayers,
     result: {
-      secretWord: word,
+      secretWord,
       impostors: players.filter((p) => impostorIds.has(p.id)),
       guessedPlayers: [],
       pointsDelta: delta,
-      resultMessage: allCorrect ? 'Gracze wykryli wszystkich Reproduktorów!' : 'Reproduktorzy uniknęli wykrycia!',
+      resultMessage: allCorrect
+        ? 'Gracze wykryli wszystkich Reproduktorów!'
+        : 'Reproduktorzy uniknęli wykrycia!',
       resultType: allCorrect ? 'IMPOSTORS_CAUGHT' : 'IMPOSTORS_ESCAPED',
     },
   }
 }
 
-export function scoreImpostorGuess(players: Player[], impostorIds: Set<string>, guessedId: string, isCorrect: boolean, word: SecretWord): { players: Player[]; result: RoundResult } {
-  const delta: Record<string, number> = Object.fromEntries(players.map((p) => [p.id, 0]))
-  if (impostorIds.has(guessedId)) delta[guessedId] = isCorrect ? 1 : -1
+export function scoreImpostorGuess(
+  players: Player[],
+  impostorIds: Set<string>,
+  guessedPlayerId: string,
+  isCorrect: boolean,
+  secretWord: SecretWord,
+): { players: Player[]; result: RoundResult } {
+  const delta: Record<string, number> = {}
+  for (const p of players) {
+    delta[p.id] = 0
+  }
+
+  if (impostorIds.has(guessedPlayerId)) {
+    delta[guessedPlayerId] = isCorrect ? 1 : -1
+  }
+
+  const updatedPlayers = players.map((p) => ({ ...p, score: p.score + (delta[p.id] ?? 0) }))
+  const guessedPlayer = players.find((p) => p.id === guessedPlayerId)
+
   return {
-    players: players.map((p) => ({ ...p, score: p.score + (delta[p.id] ?? 0) })),
+    players: updatedPlayers,
     result: {
-      secretWord: word,
+      secretWord,
       impostors: players.filter((p) => impostorIds.has(p.id)),
-      guessedPlayers: players.filter((p) => p.id === guessedId),
+      guessedPlayers: guessedPlayer ? [guessedPlayer] : [],
       pointsDelta: delta,
-      resultMessage: isCorrect ? 'Reproduktor poprawnie odgadł tajne słowo!' : 'Reproduktor nie trafił.',
-      resultType: isCorrect ? 'IMPOSTOR_GUESSED_CORRECTLY' : 'IMPOSTOR_GUESSED_INCORRECTLY',
+      resultMessage: isCorrect
+        ? `${guessedPlayer?.name ?? 'Reproduktor'} poprawnie odgadł tajne słowo! Punkt za zgadywanie.`
+        : `${guessedPlayer?.name ?? 'Reproduktor'} nie trafił. Pudło!`,
+      resultType: isCorrect
+        ? 'IMPOSTOR_GUESSED_CORRECTLY'
+        : 'IMPOSTOR_GUESSED_INCORRECTLY',
     },
   }
 }
-
-const eqSet = (a: Set<string>, b: Set<string>) => a.size === b.size && [...a].every((i) => b.has(i))
-
