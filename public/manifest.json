@@ -1,0 +1,23 @@
+﻿{
+  "name": "reproduktor-web",
+  "short_name": "Reproduktor",
+  "start_url": "/reproduktor-web/",
+  "scope": "/reproduktor-web/",
+  "display": "standalone",
+  "background_color": "#0f1020",
+  "theme_color": "#7c5cff",
+  "description": "Reproduktor - gra towarzyska w wersji PWA",
+  "icons": [
+    {
+      "src": "/reproduktor-web/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/reproduktor-web/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

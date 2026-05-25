@@ -1,0 +1,18 @@
+﻿@import "tailwindcss";
+
+:root { font-family: 'Trebuchet MS', 'Segoe UI', sans-serif; color: #f4f3ff; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #0f1020; }
+.app { min-height: 100dvh; max-width: 420px; margin: 0 auto; padding: 16px 14px 90px; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px; }
+.card { background: rgba(23,27,52,0.88); border:1px solid rgba(255,255,255,.08); border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:10px; }
+.row { display:flex; gap:8px; }
+input, select, button { border-radius: 12px; border:1px solid rgba(255,255,255,.14); padding: 10px 12px; background:#1e2447; color:#fff; }
+input { flex:1; }
+.btn { background: linear-gradient(120deg,#7c5cff,#2de2e6); border: none; font-weight: 700; }
+.chip { margin: 4px 6px 4px 0; }
+.chip.on { outline: 2px solid #2de2e6; }
+.step { display:flex; align-items:center; gap:10px; }
+.timer { font-size: 40px; font-weight: 800; text-align:center; }
+.veil { background:#0a0c18; border:1px dashed #7c5cff; border-radius:14px; padding:12px; min-height:80px; display:grid; place-items:center; }
+
