@@ -11,11 +11,20 @@ export function RevealRoleScreen({ state, theme, onContinue, onExit }: RevealRol
   const [isDragging, setIsDragging] = useState(false)
   const [hasViewedRole, setHasViewedRole] = useState(false)
   const startYRef = useRef<number | null>(null)
+  const screenHeightRef = useRef<number>(window.innerHeight)
 
-  const minOffset = -280
+  const minOffset = -Math.max(320, Math.floor(screenHeightRef.current * 0.55))
 
   const roleContent = useMemo(() => {
-    if (!current) return null
+    if (!current) {
+      return (
+        <>
+          <p className="giant-emoji">❓</p>
+          <h2>Brak gracza</h2>
+          <p className="hint">Nie udało się odczytać aktualnego gracza.</p>
+        </>
+      )
+    }
 
     if (isImpostor) {
       if (state.settings.hintsEnabled && hint) {
@@ -41,13 +50,14 @@ export function RevealRoleScreen({ state, theme, onContinue, onExit }: RevealRol
     return (
       <>
         <p className="hint">Twoje tajne słowo to:</p>
-        <h2 className="secret-word">{state.currentSecretWord?.word ?? '?'}</h2>
+        <h2 className="secret-word">{state.currentSecretWord?.word ?? 'Brak hasła'}</h2>
         <p className="hint">Zapamiętaj i nie pokazuj nikomu.</p>
       </>
     )
   }, [current, hint, isImpostor, state.currentSecretWord?.word, state.settings.hintsEnabled, theme.error])
 
   const handlePointerDown = (clientY: number) => {
+    screenHeightRef.current = window.innerHeight
     startYRef.current = clientY
     setIsDragging(true)
   }
@@ -60,7 +70,10 @@ export function RevealRoleScreen({ state, theme, onContinue, onExit }: RevealRol
   }
 
   const handlePointerUp = () => {
-    if (Math.abs(offsetY) > 180) setHasViewedRole(true)
+    const threshold = Math.abs(minOffset) * 0.6
+    if (Math.abs(offsetY) >= threshold) {
+      setHasViewedRole(true)
+    }
     setOffsetY(0)
     setIsDragging(false)
     startYRef.current = null
@@ -70,27 +83,29 @@ export function RevealRoleScreen({ state, theme, onContinue, onExit }: RevealRol
     <div className="screen reveal-screen">
       <button className="close-btn" onClick={onExit}>✕</button>
 
-      <div className="reveal-role-content">
-        <h2 className="fit-name">{current?.name ?? '?'}</h2>
-        <p className="hint">Gracz {state.currentRevealIndex + 1} z {state.players.length}</p>
+      <div className="reveal-under-layer">
+        <div className="reveal-role-content">
+          <h2 className="fit-name">{current?.name ?? '?'}</h2>
+          <p className="hint">Gracz {state.currentRevealIndex + 1} z {state.players.length}</p>
 
-        <section className="revealed-panel">{roleContent}</section>
+          <section className="revealed-panel">{roleContent}</section>
 
-        {hasViewedRole ? (
-          <div className="remember-block">
-            <p className="giant-emoji">👁</p>
-            <h3>Zapamiętałeś swoją rolę?</h3>
-            <p>Możesz teraz przekazać telefon.</p>
-            <PrimaryButton theme={theme} onClick={onContinue}>Kontynuuj →</PrimaryButton>
-          </div>
-        ) : (
-          <div className="swipe-hint">
-            <p>Przesuń w górę i przytrzymaj, aby podejrzeć rolę.</p>
-            <span>︿</span>
-            <span>︿</span>
-            <span>︿</span>
-          </div>
-        )}
+          {hasViewedRole ? (
+            <div className="remember-block">
+              <p className="giant-emoji">👁</p>
+              <h3>Zapamiętałeś swoją rolę?</h3>
+              <p>Możesz teraz przekazać telefon.</p>
+              <PrimaryButton theme={theme} onClick={onContinue}>Kontynuuj →</PrimaryButton>
+            </div>
+          ) : (
+            <div className="swipe-hint">
+              <p>Przesuń w górę i przytrzymaj, aby podejrzeć rolę.</p>
+              <span>︿</span>
+              <span>︿</span>
+              <span>︿</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div

@@ -328,7 +328,15 @@ input {
 
 .reveal-screen {
   overflow: hidden;
+  position: relative;
 }
+
+.reveal-under-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
 
 .reveal-role-content {
   min-height: 100dvh;
@@ -377,6 +385,7 @@ input {
 }
 
 .reveal-cover {
+  z-index: 10;
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, #0f1020, #171b34);
@@ -433,3 +442,5 @@ input {
 .danger-outline {
   background: transparent;
 }
+
+
