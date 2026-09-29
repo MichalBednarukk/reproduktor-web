@@ -13,7 +13,7 @@ export default defineConfig({
       manifest: false, // używamy public/manifest.json
       workbox: {
         // Baza haseł (.json) i ikony też trafiają do cache — gra działa offline.
-        globPatterns: ['**/*.{js,css,html,json,png,svg}'],
+        globPatterns: ['**/*.{js,css,html,json,png,svg,woff2}'],
       },
     }),
   ],

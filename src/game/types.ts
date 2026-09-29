@@ -76,6 +76,8 @@ export type GameState = {
   impostorHistory: string[][]
   /** Kto zaczynał kolejne rundy tej gry — dla fairPick. */
   starterHistory: string[]
+  /** Wyniki wszystkich rund tej gry — do nagród na koniec gry. */
+  roundHistory: RoundResult[]
 }
 
 export type WordsPayload = {
@@ -114,4 +116,5 @@ export const DEFAULT_STATE: GameState = {
   usedWordIds: new Set(),
   impostorHistory: [],
   starterHistory: [],
+  roundHistory: [],
 }

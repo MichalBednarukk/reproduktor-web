@@ -209,7 +209,7 @@ export function startGameRound(state: GameState): GameState {
 export function submitVotes(state: GameState, selected: Set<string>): GameState {
   if (!state.currentSecretWord) return state
   const { players, result } = scoreVotes(state.players, state.currentImpostorIds, selected, state.currentSecretWord)
-  return { ...state, players, lastRoundResult: result, phase: 'ROUND_RESULT' }
+  return { ...state, players, lastRoundResult: result, roundHistory: [...state.roundHistory, result], phase: 'ROUND_RESULT' }
 }
 
 /** null = wybrany gracz nie jest Reproduktorem (UI pokazuje błąd). */
@@ -223,7 +223,7 @@ export function handleImpostorGuess(state: GameState, playerId: string, isCorrec
     isCorrect,
     state.currentSecretWord,
   )
-  return { ...state, players, lastRoundResult: result, phase: 'ROUND_RESULT' }
+  return { ...state, players, lastRoundResult: result, roundHistory: [...state.roundHistory, result], phase: 'ROUND_RESULT' }
 }
 
 export const getWinners = (state: GameState): Player[] =>

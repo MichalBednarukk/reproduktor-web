@@ -1,6 +1,6 @@
 // Odpowiedniki: Material3 AlertDialog, ExitGameDialog.kt, ImpostorGuessDialog.kt, ScoreTable.kt.
 
-import { useState, type ReactNode } from 'react'
+import { useState, type PointerEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import type { AvatarMood } from '../avatars/characters'
@@ -14,12 +14,46 @@ type DialogShellProps = {
   className?: string
 }
 
-/** Warstwa dialogu: przyciemnienie, zamykanie kliknięciem obok, „wstecz” i Esc. */
+const SHEET_DISMISS_PX = 90
+
+/**
+ * Okno wysuwane od dołu (odpowiednik AppSheet.kt): przyciemnienie, uchwyt, zamykanie przeciągnięciem
+ * w dół, kliknięciem obok, „wstecz” i Esc.
+ */
 export function DialogShell({ onDismiss, children, className }: DialogShellProps) {
   useBackHandler(onDismiss, true, BACK_PRIORITY_DIALOG)
+  const [drag, setDrag] = useState<{ startY: number; dy: number } | null>(null)
+
+  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setDrag({ startY: e.clientY, dy: 0 })
+  }
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (drag) setDrag({ ...drag, dy: Math.max(0, e.clientY - drag.startY) })
+  }
+  const onPointerUp = () => {
+    if (drag && drag.dy > SHEET_DISMISS_PX) onDismiss()
+    setDrag(null)
+  }
+
   return createPortal(
     <div className="scrim" onClick={onDismiss}>
-      <div className={className} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`sheet ${className ?? ''}`}
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+        style={drag ? { transform: `translateY(${drag.dy}px)`, transition: 'none' } : undefined}
+      >
+        <div
+          className="sheet-handle-area"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+        >
+          <span className="sheet-handle" />
+        </div>
         {children}
       </div>
     </div>,

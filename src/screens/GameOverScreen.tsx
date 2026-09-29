@@ -1,11 +1,13 @@
-// Odpowiednik GameOverScreen.kt. „Wstecz” nic nie robi (BackHandler { } na Androidzie).
+// Odpowiednik GameOverScreen.kt: podium 1-2-3, konfetti, nagrody i tabela. „Wstecz” nic nie robi (BackHandler { } na Androidzie).
 
-import type { AvatarMood } from '../avatars/characters'
-import { PlayerAvatar } from '../avatars/PlayerAvatar'
+import { AwardsList } from '../components/AwardsList'
 import { AppBackground, BottomBar, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
+import { Confetti } from '../components/Confetti'
 import { ScoreTable } from '../components/Dialogs'
+import { Podium } from '../components/Podium'
 import { TopCornerActions } from '../components/TopCornerActions'
 import { useBackHandler } from '../navigation/backHandler'
+import { computeAwards } from '../game/awards'
 import type { ScreenProps } from './types'
 
 export function GameOverScreen({ game, theme, onSelectTheme, openRules }: ScreenProps) {
@@ -18,16 +20,7 @@ export function GameOverScreen({ game, theme, onSelectTheme, openRules }: Screen
   useBackHandler(() => {})
 
   const winnerIds = new Set(winners.map((p) => p.id))
-  const people = (list: typeof players, className: string, mood: AvatarMood) => (
-    <div className="avatar-row">
-      {list.map((p) => (
-        <div key={p.id} className="avatar-person">
-          <PlayerAvatar avatar={p.avatarEmoji} size={list.length === 1 ? 180 : list.length <= 3 ? 120 : 88} mood={mood} loop={mood === 'win'} />
-          <span className={className}>{p.name}</span>
-        </div>
-      ))}
-    </div>
-  )
+  const awards = computeAwards(players, game.state.roundHistory)
 
   return (
     <AppBackground>
@@ -39,27 +32,30 @@ export function GameOverScreen({ game, theme, onSelectTheme, openRules }: Screen
           <h1 className="title-36">{endedByPoints ? 'KONIEC GRY!' : 'Koniec rozgrywki'}</h1>
           <Spacer h={16} />
           {endedByPoints ? (
-            <>
-              <p className="body-17 text-secondary">{winners.length === 1 ? 'Wygrywa:' : 'Wygrywają:'}</p>
-              <Spacer h={6} />
-              {people(winners, winners.length === 1 ? 'winner-single' : 'winner-list', 'win')}
-            </>
+            <p className="body-17 text-secondary">
+              {winners.length === 1 ? `Wygrywa ${winners[0].name}!` : `Wygrywają: ${winners.map((p) => p.name).join(', ')}!`}
+            </p>
           ) : (
+            <p className="body-17 text-secondary">
+              {maxScore > 0 ? (leaders.length === 1 ? 'Najlepszy wynik' : 'Remis na prowadzeniu') : 'Nikt nie zdobył jeszcze punktów.'}
+            </p>
+          )}
+          {maxScore > 0 && (
             <>
-              <p className="body-17 text-secondary">Aktualne wyniki</p>
-              <Spacer h={8} />
-              {maxScore > 0 ? (
-                <>
-                  <p className="body-14 text-muted">{leaders.length === 1 ? 'Najlepszy wynik:' : 'Remis na prowadzeniu:'}</p>
-                  <Spacer h={4} />
-                  {people(leaders, 'winner-list', 'happy')}
-                </>
-              ) : (
-                <p className="body-15 text-muted center">Nikt nie zdobył jeszcze punktów.</p>
-              )}
+              <Spacer h={20} />
+              <Podium players={players} />
             </>
           )}
-          <Spacer h={32} />
+          {awards.length > 0 && (
+            <>
+              <Spacer h={24} />
+              <DarkCard className="full-width">
+                <h3 className="card-heading">🏅 Nagrody</h3>
+                <AwardsList awards={awards} />
+              </DarkCard>
+            </>
+          )}
+          <Spacer h={16} />
           <DarkCard className="full-width">
             <h3 className="card-heading">Finalna tabela wyników</h3>
             <ScoreTable
@@ -70,6 +66,7 @@ export function GameOverScreen({ game, theme, onSelectTheme, openRules }: Screen
           </DarkCard>
           <Spacer h={16} />
         </div>
+        {endedByPoints && <Confetti count={90} />}
         <TopCornerActions side="end" theme={theme} onSelectTheme={onSelectTheme} onInfoClick={() => openRules()} />
         <BottomBar>
           <PrimaryButton
