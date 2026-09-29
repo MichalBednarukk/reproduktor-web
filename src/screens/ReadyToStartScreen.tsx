@@ -14,7 +14,7 @@ export function ReadyToStartScreen({ game }: ScreenProps) {
         <div className="centered-column pad-32">
           <div className="avatar-row">
             {game.state.players.map((p) => (
-              <PlayerAvatar key={p.id} avatar={p.avatarEmoji} size={game.state.players.length > 6 ? 44 : 56} mood="happy" loop />
+              <PlayerAvatar key={p.id} avatar={p.avatarEmoji} size={game.state.players.length > 6 ? 64 : game.state.players.length > 4 ? 88 : 110} mood="happy" loop />
             ))}
           </div>
           <Spacer h={32} />

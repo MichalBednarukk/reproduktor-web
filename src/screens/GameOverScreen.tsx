@@ -22,7 +22,7 @@ export function GameOverScreen({ game, theme, onSelectTheme, openRules }: Screen
     <div className="avatar-row">
       {list.map((p) => (
         <div key={p.id} className="avatar-person">
-          <PlayerAvatar avatar={p.avatarEmoji} size={list.length === 1 ? 110 : 76} mood={mood} loop={mood === 'win'} />
+          <PlayerAvatar avatar={p.avatarEmoji} size={list.length === 1 ? 180 : list.length <= 3 ? 120 : 88} mood={mood} loop={mood === 'win'} />
           <span className={className}>{p.name}</span>
         </div>
       ))}

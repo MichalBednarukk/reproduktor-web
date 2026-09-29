@@ -15,7 +15,7 @@ export function PassPhoneScreen({ game }: ScreenProps) {
     <AppBackground>
       <div className="screen">
         <div className="centered-column pad-32">
-          {current ? <PlayerAvatar avatar={current.avatarEmoji} size={110} mood="happy" /> : <span className="emoji-88">📱</span>}
+          {current ? <PlayerAvatar avatar={current.avatarEmoji} size={190} mood="happy" /> : <span className="emoji-88">📱</span>}
           <Spacer h={20} />
           <DarkCard padding={24} radius={28} className="full-width">
             <p className="body-16 text-secondary center">Przekaż telefon do</p>

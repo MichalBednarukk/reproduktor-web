@@ -76,7 +76,7 @@ export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: Scree
                     <div className="starter-content">
                       <p className="body-12 text-muted">Rundę zaczyna</p>
                       <Spacer h={6} />
-                      <PlayerAvatar avatar={state.startingPlayer.avatarEmoji} size={60} mood="happy" />
+                      <PlayerAvatar avatar={state.startingPlayer.avatarEmoji} size={150} mood="happy" loop />
                       <Spacer h={4} />
                       <p className="starter-name">{state.startingPlayer.name}</p>
                       <Spacer h={6} />

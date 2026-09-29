@@ -42,7 +42,7 @@ export function RoundResultScreen({ game, theme, onSelectTheme, openRules }: Scr
                 <div className="result-impostors avatar-row start">
                   {result.impostors.map((p) => (
                     <span key={p.id} className="avatar-chip">
-                      <PlayerAvatar avatar={p.avatarEmoji} size={34} mood={resultMood(result, p.id)} />
+                      <PlayerAvatar avatar={p.avatarEmoji} size={64} mood={resultMood(result, p.id)} />
                       {p.name}
                     </span>
                   ))}

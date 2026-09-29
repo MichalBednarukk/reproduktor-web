@@ -50,7 +50,7 @@ export function VotingScreen({ game, theme, onSelectTheme, openRules }: ScreenPr
                 onClick={() => toggle(player.id)}
               >
                 <span className="vote-avatar">
-                  <PlayerAvatar avatar={player.avatarEmoji} size={40} mood={isSelected ? 'caught' : 'idle'} />
+                  <PlayerAvatar avatar={player.avatarEmoji} size={60} mood={isSelected ? 'caught' : 'idle'} />
                 </span>
                 <span className="vote-name">{player.name}</span>
                 {isSelected && <span className="check big">✓</span>}

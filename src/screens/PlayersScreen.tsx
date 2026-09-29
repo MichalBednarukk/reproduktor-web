@@ -96,7 +96,7 @@ export function PlayersScreen({ game, theme, onSelectTheme, openRules }: ScreenP
               <DarkCard key={player.id} padding={4} radius={20} className="player-card">
                 <div className="player-row">
                   <span className="player-avatar">
-                    <PlayerAvatar avatar={player.avatarEmoji} size={44} mood={player.name === justAdded ? 'happy' : 'idle'} />
+                    <PlayerAvatar avatar={player.avatarEmoji} size={64} mood={player.name === justAdded ? 'happy' : 'idle'} />
                   </span>
                   <span className="player-name">{player.name}</span>
                   <button

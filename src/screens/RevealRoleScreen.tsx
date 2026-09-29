@@ -122,7 +122,7 @@ function PeekReveal(props: PeekRevealProps) {
         <div className="reveal-role">
           {isImpostor ? (
             <>
-              <PlayerAvatar avatar={props.avatar} size={96} mood="sneaky" />
+              <PlayerAvatar avatar={props.avatar} size={130} mood="sneaky" />
               <Spacer h={12} />
               {hintsEnabled && hintText ? (
                 <>
@@ -159,7 +159,7 @@ function PeekReveal(props: PeekRevealProps) {
             </>
           ) : (
             <>
-              <PlayerAvatar avatar={props.avatar} size={80} mood="happy" />
+              <PlayerAvatar avatar={props.avatar} size={120} mood="happy" />
               <Spacer h={8} />
               <p className="body-14 text-muted center">Twoje tajne słowo to:</p>
               <Spacer h={10} />
@@ -191,7 +191,7 @@ function PeekReveal(props: PeekRevealProps) {
       >
         <div className="reveal-cover-content">
           <Spacer h={40} />
-          <PlayerAvatar avatar={props.avatar} size={96} mood={showConfirmation ? 'happy' : 'idle'} />
+          <PlayerAvatar avatar={props.avatar} size={150} mood={showConfirmation ? 'happy' : 'idle'} />
           <Spacer h={8} />
           <AutoResizeText
             text={props.playerName.trim()}

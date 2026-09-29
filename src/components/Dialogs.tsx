@@ -108,7 +108,7 @@ export function ImpostorGuessDialog({ players, onGuessResult, onDismiss, dismiss
               }}
             >
               <span className="guess-avatar">
-                <PlayerAvatar avatar={player.avatarEmoji} size={34} mood={isSelected ? 'sneaky' : 'idle'} />
+                <PlayerAvatar avatar={player.avatarEmoji} size={48} mood={isSelected ? 'sneaky' : 'idle'} />
               </span>
               <span className="guess-name">{player.name}</span>
               {isSelected && <span className="check">✓</span>}
@@ -120,7 +120,7 @@ export function ImpostorGuessDialog({ players, onGuessResult, onDismiss, dismiss
         {selected && (
           <p className="guess-status">
             <span className="avatar-chip">
-              <PlayerAvatar avatar={selected.avatarEmoji} size={24} mood="sneaky" />
+              <PlayerAvatar avatar={selected.avatarEmoji} size={32} mood="sneaky" />
               {selected.name} zgaduje...
             </span>
           </p>
@@ -166,7 +166,7 @@ export function ScoreTable({ players, pointsDelta = {}, showAvatars = false, moo
             <div className="score-left">
               {showAvatars && (
                 <span className="score-avatar">
-                  <PlayerAvatar avatar={player.avatarEmoji} size={30} mood={moods[player.id]} />
+                  <PlayerAvatar avatar={player.avatarEmoji} size={44} mood={moods[player.id]} />
                 </span>
               )}
               <span className="score-name">{player.name}</span>
