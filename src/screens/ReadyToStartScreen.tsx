@@ -1,5 +1,6 @@
 // Odpowiednik ReadyToStartScreen.kt.
 
+import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AppBackground, CloseButton, PrimaryButton, Spacer } from '../components/Basics'
 import type { ScreenProps } from './types'
 import { useExitGame } from './useExitGame'
@@ -11,7 +12,11 @@ export function ReadyToStartScreen({ game }: ScreenProps) {
     <AppBackground>
       <div className="screen">
         <div className="centered-column pad-32">
-          <span className="emoji-80">🎯</span>
+          <div className="avatar-row">
+            {game.state.players.map((p) => (
+              <PlayerAvatar key={p.id} avatar={p.avatarEmoji} size={game.state.players.length > 6 ? 44 : 56} mood="happy" loop />
+            ))}
+          </div>
           <Spacer h={32} />
           <h1 className="ready-title">
             Wszyscy sprawdzili

@@ -4,6 +4,7 @@
 // Po puszczeniu zasłona wraca, a na niej pojawia się „Zapamiętałeś swoją rolę?”.
 
 import { useRef, useState, type PointerEvent } from 'react'
+import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AutoResizeText } from '../components/AutoResizeText'
 import { CloseButton, DarkCard, PrimaryButton, Spacer } from '../components/Basics'
 import type { ScreenProps } from './types'
@@ -28,6 +29,7 @@ export function RevealRoleScreen({ game }: ScreenProps) {
       <PeekReveal
         key={current.id}
         playerName={current.name}
+        avatar={current.avatarEmoji}
         playerIdx={state.currentRevealIndex + 1}
         playerCount={state.players.length}
         isImpostor={isImpostor}
@@ -48,6 +50,7 @@ export function RevealRoleScreen({ game }: ScreenProps) {
 
 type PeekRevealProps = {
   playerName: string
+  avatar: string
   playerIdx: number
   playerCount: number
   isImpostor: boolean
@@ -119,7 +122,7 @@ function PeekReveal(props: PeekRevealProps) {
         <div className="reveal-role">
           {isImpostor ? (
             <>
-              <span className="emoji-72">🥷</span>
+              <PlayerAvatar avatar={props.avatar} size={96} mood="sneaky" />
               <Spacer h={12} />
               {hintsEnabled && hintText ? (
                 <>
@@ -156,6 +159,8 @@ function PeekReveal(props: PeekRevealProps) {
             </>
           ) : (
             <>
+              <PlayerAvatar avatar={props.avatar} size={80} mood="happy" />
+              <Spacer h={8} />
               <p className="body-14 text-muted center">Twoje tajne słowo to:</p>
               <Spacer h={10} />
               <div ref={readableRef} className="full-width">
@@ -185,7 +190,9 @@ function PeekReveal(props: PeekRevealProps) {
         onPointerCancel={onPointerEnd}
       >
         <div className="reveal-cover-content">
-          <Spacer h={56} />
+          <Spacer h={40} />
+          <PlayerAvatar avatar={props.avatar} size={96} mood={showConfirmation ? 'happy' : 'idle'} />
+          <Spacer h={8} />
           <AutoResizeText
             text={props.playerName.trim()}
             maxFontSize={44}
@@ -201,7 +208,7 @@ function PeekReveal(props: PeekRevealProps) {
           <div className="flex-1" />
           {showConfirmation ? (
             <div className="reveal-confirmation">
-              <span className="emoji-64">👁</span>
+              <span className="emoji-64 blink-eye">👁</span>
               <Spacer h={20} />
               <h2 className="reveal-card-title">Zapamiętałeś swoją rolę?</h2>
               <Spacer h={10} />
@@ -213,7 +220,7 @@ function PeekReveal(props: PeekRevealProps) {
             </div>
           ) : (
             <div className="reveal-instruction">
-              <span className="emoji-56">🔒</span>
+              <span className="emoji-56 lock-wiggle">🔒</span>
               <Spacer h={20} />
               <h2 className="reveal-card-title">Twoja rola jest ukryta</h2>
               <Spacer h={12} />

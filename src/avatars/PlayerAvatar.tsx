@@ -16,14 +16,95 @@ type Props = {
 
 export function PlayerAvatar({ avatar, size, mood = 'idle', loop = false }: Props) {
   const svg = characterSvg(avatar)
-  if (!svg) {
-    return (
-      <span className="avatar-emoji" style={{ width: size, height: size, fontSize: size * 0.78 }} aria-hidden="true">
-        {avatar}
-      </span>
-    )
-  }
+  if (!svg) return <EmojiAvatar emoji={avatar} size={size} mood={mood} loop={loop} />
   return <CharacterAvatar svg={svg} size={size} mood={mood} loop={loop} />
+}
+
+/** Emotka (gracze bez postaci): oddycha w spoczynku i reaguje ruchem całej emotki. */
+function EmojiAvatar({ emoji, size, mood, loop }: { emoji: string; size: number; mood: AvatarMood; loop: boolean }) {
+  const rootRef = useRef<HTMLSpanElement>(null)
+  const innerRef = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    const inner = innerRef.current
+    if (!inner || prefersReducedMotion()) return
+    const breathe = inner.animate([{ transform: 'scale(1, 1)' }, { transform: 'scale(1.04, 0.96)' }], {
+      duration: 1400,
+      iterations: Infinity,
+      direction: 'alternate',
+      easing: 'ease-in-out',
+      delay: -Math.random() * 1400,
+    })
+    return () => breathe.cancel()
+  }, [])
+
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root || prefersReducedMotion()) return
+    const running: Animation[] = []
+    const play = () => {
+      running.splice(0).forEach((a) => a.cancel())
+      running.push(...playEmojiMotion(mood, root, size / CHARACTER_VIEWBOX.size))
+    }
+    play()
+    const loopTimer = loop && mood !== 'idle' ? window.setInterval(play, LOOP_INTERVAL_MS) : 0
+    return () => {
+      window.clearInterval(loopTimer)
+      running.forEach((a) => a.cancel())
+    }
+  }, [mood, loop, size])
+
+  return (
+    <span className="avatar-emoji" ref={rootRef} style={{ width: size, height: size, fontSize: size * 0.78 }} aria-hidden="true">
+      <span className="avatar-emoji-inner" ref={innerRef}>
+        {emoji}
+      </span>
+    </span>
+  )
+}
+
+function playEmojiMotion(mood: AvatarMood, root: HTMLElement, unit: number): Animation[] {
+  const px = (v: number) => `${v * unit}px`
+  const hold: KeyframeAnimationOptions = { duration: 450, fill: 'forwards', easing: 'ease-out' }
+  switch (mood) {
+    case 'happy':
+    case 'caught':
+    case 'win':
+      return rootMotion(mood, root, px)
+    case 'sneaky':
+      return [root.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-10deg) translateX(-4%)' }], hold)]
+    case 'sad':
+      return [root.animate([{ transform: 'none' }, { transform: `translateY(${px(12)}) scale(1.06, 0.88) rotate(6deg)` }], hold)]
+    default:
+      return []
+  }
+}
+
+/** Ruch całej postaci/emotki: skoki i trzęsienie (wspólne dla obu rodzajów avatarów). */
+function rootMotion(mood: 'happy' | 'caught' | 'win', root: HTMLElement, px: (v: number) => string): Animation[] {
+  if (mood === 'happy') {
+    return [
+      root.animate(
+        [
+          { transform: 'translateY(0)' },
+          { transform: `translateY(${px(-40)}) scale(1.02, 0.98)` },
+          { transform: 'translateY(0) scale(1.05, 0.95)' },
+          { transform: 'translateY(0)' },
+        ],
+        { duration: 600, iterations: 2, easing: 'ease-out' },
+      ),
+    ]
+  }
+  if (mood === 'caught') {
+    return [root.animate([0, -14, 12, -10, 8, -5, 3, 0].map((x) => ({ transform: `translateX(${px(x)})` })), { duration: 600 })]
+  }
+  return [
+    root.animate([{ transform: 'translateY(0)' }, { transform: `translateY(${px(-60)}) rotate(-4deg)` }, { transform: 'translateY(0)' }], {
+      duration: 500,
+      iterations: 3,
+      easing: 'ease-in-out',
+    }),
+  ]
 }
 
 type Parts = {
@@ -185,17 +266,7 @@ function playMotion(mood: AvatarMood, parts: Parts, root: HTMLElement, unit: num
   const px = (v: number) => `${v * unit}px`
   switch (mood) {
     case 'happy':
-      return [
-        root.animate(
-          [
-            { transform: 'translateY(0)' },
-            { transform: `translateY(${px(-40)}) scale(1.02, 0.98)` },
-            { transform: 'translateY(0) scale(1.05, 0.95)' },
-            { transform: 'translateY(0)' },
-          ],
-          { duration: 600, iterations: 2, easing: 'ease-out' },
-        ),
-      ]
+      return rootMotion('happy', root, px)
     case 'sneaky':
       return [
         parts.head.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-6deg) translateX(-6px)' }], {
@@ -206,7 +277,7 @@ function playMotion(mood: AvatarMood, parts: Parts, root: HTMLElement, unit: num
       ]
     case 'caught':
       return [
-        root.animate([0, -14, 12, -10, 8, -5, 3, 0].map((x) => ({ transform: `translateX(${px(x)})` })), { duration: 600 }),
+        ...rootMotion('caught', root, px),
         parts.body.animate([{ transform: 'scale(1)' }, { transform: 'scale(0.92, 1.06)' }, { transform: 'scale(1)' }], {
           duration: 300,
           composite: 'add',
@@ -215,10 +286,7 @@ function playMotion(mood: AvatarMood, parts: Parts, root: HTMLElement, unit: num
     case 'win': {
       const wave = [{ transform: 'rotate(0)' }, { transform: 'rotate(-35deg)' }, { transform: 'rotate(0)' }]
       const result = [
-        root.animate(
-          [{ transform: 'translateY(0)' }, { transform: `translateY(${px(-60)}) rotate(-4deg)` }, { transform: 'translateY(0)' }],
-          { duration: 500, iterations: 3, easing: 'ease-in-out' },
-        ),
+        ...rootMotion('win', root, px),
         parts.armR.animate(wave, { duration: 500, iterations: 3, composite: 'add' }),
       ]
       if (parts.accessory) result.push(parts.accessory.animate(wave, { duration: 500, iterations: 3, composite: 'add' }))

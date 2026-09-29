@@ -1,6 +1,6 @@
 // Odpowiednik PlayersScreen.kt.
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AppBackground, BottomBar, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
 import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AlertDialog } from '../components/Dialogs'
@@ -13,6 +13,13 @@ export function PlayersScreen({ game, theme, onSelectTheme, openRules }: ScreenP
   const [inputText, setInputText] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
   const [showRemoveAll, setShowRemoveAll] = useState(false)
+  // Świeżo dodany gracz podskakuje z radości.
+  const [justAdded, setJustAdded] = useState<string | null>(null)
+  useEffect(() => {
+    if (!justAdded) return
+    const handle = window.setTimeout(() => setJustAdded(null), 1400)
+    return () => window.clearTimeout(handle)
+  }, [justAdded])
 
   const tryAdd = () => {
     const cleaned = inputText.trim()
@@ -21,6 +28,7 @@ export function PlayersScreen({ game, theme, onSelectTheme, openRules }: ScreenP
       return
     }
     if (game.addPlayer(cleaned)) {
+      setJustAdded(cleaned)
       setInputText('')
       setErrorMsg('')
       return
@@ -88,7 +96,7 @@ export function PlayersScreen({ game, theme, onSelectTheme, openRules }: ScreenP
               <DarkCard key={player.id} padding={4} radius={20} className="player-card">
                 <div className="player-row">
                   <span className="player-avatar">
-                    <PlayerAvatar avatar={player.avatarEmoji} size={44} />
+                    <PlayerAvatar avatar={player.avatarEmoji} size={44} mood={player.name === justAdded ? 'happy' : 'idle'} />
                   </span>
                   <span className="player-name">{player.name}</span>
                   <button
