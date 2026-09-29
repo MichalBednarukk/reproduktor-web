@@ -10,7 +10,12 @@ import { appStorage } from '../storage/localStorage'
 export type WordsStatus = 'loading' | 'ready' | 'error'
 
 export function useGame() {
-  const [state, setStateRaw] = useState<GameState>(() => engine.createInitialState(appStorage.loadPlayers()))
+  const [state, setStateRaw] = useState<GameState>(() => {
+    const saved = appStorage.loadPlayers()
+    const players = engine.upgradeToCharacters(saved)
+    if (players !== saved) appStorage.savePlayers(players)
+    return engine.createInitialState(players)
+  })
   const stateRef = useRef(state)
 
   /** Aktualizuje stan synchronicznie (jak MutableStateFlow), więc metody mogą zwracać wynik od razu. */

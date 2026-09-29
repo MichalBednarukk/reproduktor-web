@@ -45,6 +45,17 @@ const maxImpostorsFor = (playerCount: number) => Math.max(1, playerCount - 2)
  * Avatar dla nowego gracza. Najpierw wolne postacie (animowane, z AVATAR/), potem wolne emotki.
  * Pole Player.avatarEmoji przechowuje id postaci (np. „pierozek”) albo emotkę.
  */
+/**
+ * Zapisani wcześniej gracze z emotkami dostają wolne postacie (emotka zostaje tylko, gdy postaci brakuje).
+ * Zwraca tę samą tablicę, jeśli nic się nie zmieniło.
+ */
+export function upgradeToCharacters(players: Player[]): Player[] {
+  const used = new Set(players.map((p) => p.avatarEmoji))
+  const free = shuffled(CHARACTER_IDS.filter((c) => !used.has(c)))
+  if (free.length === 0 || players.every((p) => CHARACTER_IDS.includes(p.avatarEmoji))) return players
+  return players.map((p) => (CHARACTER_IDS.includes(p.avatarEmoji) || free.length === 0 ? p : { ...p, avatarEmoji: free.shift()! }))
+}
+
 export function nextAvatarEmoji(players: Player[]): string {
   const used = new Set(players.map((p) => p.avatarEmoji))
   return (
