@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { AppBackground, BottomBar, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
 import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AlertDialog } from '../components/Dialogs'
+import { InstallBanner } from '../components/InstallApp'
 import { ReorderableList } from '../components/ReorderableList'
 import { TopCornerActions } from '../components/TopCornerActions'
 import { MAX_PLAYER_NAME_LENGTH, MAX_PLAYERS, MIN_PLAYERS } from '../game/gameEngine'
@@ -59,7 +60,9 @@ export function PlayersScreen({ game, theme, onSelectTheme, openRules }: ScreenP
               </button>
             )}
           </div>
-          <Spacer h={20} />
+          <Spacer h={16} />
+          <InstallBanner />
+          <Spacer h={4} />
           <DarkCard padding={12} radius={20}>
             <form
               className="player-input-row"

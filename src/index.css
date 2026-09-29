@@ -1541,7 +1541,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 32px calc(130px + var(--safe-bottom));
+  padding: 0 32px calc(36px + var(--safe-bottom));
 }
 
 .impostor-title {
@@ -2029,4 +2029,62 @@ button:disabled {
   align-items: flex-end;
   gap: 12px 14px;
   animation: fade-in 400ms ease-out;
+}
+
+/* ── „Dodaj do ekranu głównego” (InstallApp.tsx) ─────────────────────────── */
+
+.install-banner {
+  display: flex;
+  align-items: center;
+  border-radius: 20px;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--primary) 22%, transparent), color-mix(in srgb, var(--secondary) 14%, transparent));
+  border: 1px solid color-mix(in srgb, var(--secondary) 45%, transparent);
+  margin-bottom: 12px;
+}
+
+.install-banner-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px 12px 14px;
+  border: none;
+  background: transparent;
+  text-align: left;
+}
+
+.install-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.install-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-secondary);
+}
+
+.install-text strong {
+  font-size: 15px;
+  color: var(--text);
+}
+
+.install-close {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.install-option {
+  margin-top: 12px;
+  border-color: var(--secondary);
+}
+
+.install-steps {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }

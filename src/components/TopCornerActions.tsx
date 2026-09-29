@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { THEMES, type AppColorTheme } from '../theme/themes'
 import { AlertDialog } from './Dialogs'
+import { useInstallAction } from '../platform/useInstallAction'
 
 type Props = {
   side: 'start' | 'end'
@@ -15,6 +16,7 @@ type Props = {
 
 export function TopCornerActions({ side, theme, onSelectTheme, onInfoClick, onSettingsDialogVisibilityChanged }: Props) {
   const [showSettings, setShowSettings] = useState(false)
+  const install = useInstallAction()
   // Motyw z chwili otwarcia — „Anuluj” przywraca go (wybór w dialogu działa od razu jako podgląd).
   const [themeAtOpen, setThemeAtOpen] = useState(theme)
   const visibilityCallback = useRef(onSettingsDialogVisibilityChanged)
@@ -78,6 +80,19 @@ export function TopCornerActions({ side, theme, onSelectTheme, onInfoClick, onSe
                   </button>
                 )
               })}
+              {install.available && (
+                <button
+                  type="button"
+                  className="theme-option install-option"
+                  onClick={() => {
+                    close()
+                    install.start()
+                  }}
+                >
+                  <span className="theme-title">📲 Dodaj do ekranu głównego</span>
+                  <span className="theme-description">Reproduktor otworzy się jak aplikacja.</span>
+                </button>
+              )}
             </>
           }
           confirm={{ text: 'Zamknij', onClick: close, color: 'var(--text)' }}
@@ -85,6 +100,7 @@ export function TopCornerActions({ side, theme, onSelectTheme, onInfoClick, onSe
           onDismissRequest={close}
         />
       )}
+      {install.dialog}
     </>
   )
 }
