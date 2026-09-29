@@ -190,9 +190,7 @@ function PeekReveal(props: PeekRevealProps) {
         onPointerCancel={onPointerEnd}
       >
         <div className="reveal-cover-content">
-          <Spacer h={40} />
-          <PlayerAvatar avatar={props.avatar} size={150} mood={showConfirmation ? 'happy' : 'idle'} />
-          <Spacer h={8} />
+          <Spacer h={56} />
           <AutoResizeText
             text={props.playerName.trim()}
             maxFontSize={44}
@@ -205,6 +203,8 @@ function PeekReveal(props: PeekRevealProps) {
           <p className="reveal-counter">
             Gracz {props.playerIdx} z {props.playerCount}
           </p>
+          <Spacer h={16} />
+          <PlayerAvatar avatar={props.avatar} size={220} mood={showConfirmation ? 'happy' : 'idle'} />
           <div className="flex-1" />
           {showConfirmation ? (
             <div className="reveal-confirmation">
