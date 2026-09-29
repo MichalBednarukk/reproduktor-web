@@ -3,6 +3,7 @@
 
 import { CHARACTER_IDS } from '../avatars/characters'
 import { DEFAULT_STATE, type GameSettings, type GameState, type Player, type SecretWord } from './types'
+import { fairPick } from './fairDraw'
 import { pickWord } from './wordPicker'
 import { scoreImpostorGuess, scoreVotes } from './scoring'
 
@@ -144,7 +145,7 @@ function updateHintHistory(state: GameState, usedHints: string[]): string[] {
 }
 
 const pickImpostors = (state: GameState): Set<string> =>
-  new Set(shuffled(state.players).slice(0, state.settings.impostorCount).map((p) => p.id))
+  new Set(fairPick(state.players.map((p) => p.id), state.settings.impostorCount, state.impostorHistory))
 
 /** Losuje hasło i role; null gdy brak haseł w wybranych kategoriach. */
 function drawRound(state: GameState, wordsByCategory: Record<string, SecretWord[]>): GameState | null {
@@ -161,6 +162,7 @@ function drawRound(state: GameState, wordsByCategory: Record<string, SecretWord[
     currentRevealIndex: 0,
     phase: 'PASS_PHONE',
     usedWordIds: new Set([...state.usedWordIds, word.id]),
+    impostorHistory: [...state.impostorHistory, [...impostors]],
   }
 }
 
@@ -175,9 +177,20 @@ export function revealAndContinue(state: GameState): GameState {
   return { ...state, currentRevealIndex: next, phase: next >= state.players.length ? 'READY_TO_START' : 'PASS_PHONE' }
 }
 
-/** Losuje gracza, który zaczyna rundę — może to być dowolny gracz (bez rotacji). */
+/** Losuje gracza, który zaczyna rundę (fairPick — losowo, bez długich serii). */
 export function startGameRound(state: GameState): GameState {
-  return { ...state, startingPlayer: randomOf(state.players) ?? null, phase: 'GAME_ROUND' }
+  const [id] = fairPick(
+    state.players.map((p) => p.id),
+    1,
+    state.starterHistory.map((s) => [s]),
+  )
+  const startingPlayer = state.players.find((p) => p.id === id) ?? null
+  return {
+    ...state,
+    startingPlayer,
+    starterHistory: startingPlayer ? [...state.starterHistory, startingPlayer.id] : state.starterHistory,
+    phase: 'GAME_ROUND',
+  }
 }
 
 // ── Wyniki ────────────────────────────────────────────────────────────────────

@@ -72,6 +72,10 @@ export type GameState = {
   lastRoundResult: RoundResult | null
   phase: GamePhase
   usedWordIds: Set<string>
+  /** Kto był Reproduktorem w kolejnych rundach tej gry (najstarsza pierwsza) — dla fairPick. */
+  impostorHistory: string[][]
+  /** Kto zaczynał kolejne rundy tej gry — dla fairPick. */
+  starterHistory: string[]
 }
 
 export type WordsPayload = {
@@ -108,4 +112,6 @@ export const DEFAULT_STATE: GameState = {
   lastRoundResult: null,
   phase: 'SETUP_PLAYERS',
   usedWordIds: new Set(),
+  impostorHistory: [],
+  starterHistory: [],
 }
