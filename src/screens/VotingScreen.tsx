@@ -1,6 +1,7 @@
 // Odpowiednik VotingScreen.kt.
 
 import { useState } from 'react'
+import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AppBackground, BottomBar, CloseButton, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
 import { ImpostorGuessDialog } from '../components/Dialogs'
 import { TopCornerActions } from '../components/TopCornerActions'
@@ -48,7 +49,9 @@ export function VotingScreen({ game, theme, onSelectTheme, openRules }: ScreenPr
                 className={`vote-item ${isSelected ? 'selected' : ''}`}
                 onClick={() => toggle(player.id)}
               >
-                <span className="vote-avatar">{player.avatarEmoji}</span>
+                <span className="vote-avatar">
+                  <PlayerAvatar avatar={player.avatarEmoji} size={40} mood={isSelected ? 'caught' : 'idle'} />
+                </span>
                 <span className="vote-name">{player.name}</span>
                 {isSelected && <span className="check big">✓</span>}
               </button>

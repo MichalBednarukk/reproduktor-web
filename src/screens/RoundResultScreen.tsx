@@ -1,5 +1,7 @@
 // Odpowiednik RoundResultScreen.kt.
 
+import { PlayerAvatar } from '../avatars/PlayerAvatar'
+import { resultMood } from '../avatars/moods'
 import { AppBackground, BottomBar, CloseButton, DarkCard, PrimaryButton, Spacer } from '../components/Basics'
 import { ScoreTable } from '../components/Dialogs'
 import { TopCornerActions } from '../components/TopCornerActions'
@@ -37,14 +39,24 @@ export function RoundResultScreen({ game, theme, onSelectTheme, openRules }: Scr
                 <p className="result-word">{result.secretWord.word}</p>
                 <Spacer h={12} />
                 <p className="body-13 text-muted">🥷 Reproduktorzy</p>
-                <p className="result-impostors">
-                  {result.impostors.map((p) => `${p.avatarEmoji} ${p.name}`).join(', ')}
-                </p>
+                <div className="result-impostors avatar-row start">
+                  {result.impostors.map((p) => (
+                    <span key={p.id} className="avatar-chip">
+                      <PlayerAvatar avatar={p.avatarEmoji} size={34} mood={resultMood(result, p.id)} />
+                      {p.name}
+                    </span>
+                  ))}
+                </div>
               </DarkCard>
               <Spacer h={16} />
               <DarkCard className="full-width">
                 <h3 className="card-heading">Tabela wyników</h3>
-                <ScoreTable players={players} pointsDelta={result.pointsDelta} showAvatars />
+                <ScoreTable
+                  players={players}
+                  pointsDelta={result.pointsDelta}
+                  moods={Object.fromEntries(players.map((p) => [p.id, resultMood(result, p.id)]))}
+                  showAvatars
+                />
               </DarkCard>
             </>
           )}

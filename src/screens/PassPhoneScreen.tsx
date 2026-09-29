@@ -1,5 +1,6 @@
 // Odpowiednik PassPhoneScreen.kt.
 
+import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AppBackground, CloseButton, DarkCard, PrimaryButton, Spacer } from '../components/Basics'
 import { AutoResizeText } from '../components/AutoResizeText'
 import type { ScreenProps } from './types'
@@ -14,7 +15,7 @@ export function PassPhoneScreen({ game }: ScreenProps) {
     <AppBackground>
       <div className="screen">
         <div className="centered-column pad-32">
-          <span className="emoji-88">{current?.avatarEmoji ?? '📱'}</span>
+          {current ? <PlayerAvatar avatar={current.avatarEmoji} size={110} /> : <span className="emoji-88">📱</span>}
           <Spacer h={20} />
           <DarkCard padding={24} radius={28} className="full-width">
             <p className="body-16 text-secondary center">Przekaż telefon do</p>

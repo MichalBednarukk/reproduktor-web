@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { AppBackground, BottomBar, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
+import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AlertDialog } from '../components/Dialogs'
 import { TopCornerActions } from '../components/TopCornerActions'
 import { MAX_PLAYER_NAME_LENGTH, MAX_PLAYERS, MIN_PLAYERS } from '../game/gameEngine'
@@ -86,7 +87,9 @@ export function PlayersScreen({ game, theme, onSelectTheme, openRules }: ScreenP
             .map((player) => (
               <DarkCard key={player.id} padding={4} radius={20} className="player-card">
                 <div className="player-row">
-                  <span className="player-avatar">{player.avatarEmoji}</span>
+                  <span className="player-avatar">
+                    <PlayerAvatar avatar={player.avatarEmoji} size={44} />
+                  </span>
                   <span className="player-name">{player.name}</span>
                   <button
                     type="button"

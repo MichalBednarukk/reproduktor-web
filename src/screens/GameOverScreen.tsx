@@ -1,5 +1,7 @@
 // Odpowiednik GameOverScreen.kt. „Wstecz” nic nie robi (BackHandler { } na Androidzie).
 
+import type { AvatarMood } from '../avatars/characters'
+import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AppBackground, BottomBar, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
 import { ScoreTable } from '../components/Dialogs'
 import { TopCornerActions } from '../components/TopCornerActions'
@@ -15,7 +17,17 @@ export function GameOverScreen({ game, theme, onSelectTheme, openRules }: Screen
 
   useBackHandler(() => {})
 
-  const label = (list: typeof players) => list.map((p) => `${p.avatarEmoji} ${p.name}`).join('\n')
+  const winnerIds = new Set(winners.map((p) => p.id))
+  const people = (list: typeof players, className: string, mood: AvatarMood) => (
+    <div className="avatar-row">
+      {list.map((p) => (
+        <div key={p.id} className="avatar-person">
+          <PlayerAvatar avatar={p.avatarEmoji} size={list.length === 1 ? 110 : 76} mood={mood} loop={mood === 'win'} />
+          <span className={className}>{p.name}</span>
+        </div>
+      ))}
+    </div>
+  )
 
   return (
     <AppBackground>
@@ -30,7 +42,7 @@ export function GameOverScreen({ game, theme, onSelectTheme, openRules }: Screen
             <>
               <p className="body-17 text-secondary">{winners.length === 1 ? 'Wygrywa:' : 'Wygrywają:'}</p>
               <Spacer h={6} />
-              <p className={winners.length === 1 ? 'winner-single' : 'winner-list'}>{label(winners)}</p>
+              {people(winners, winners.length === 1 ? 'winner-single' : 'winner-list', 'win')}
             </>
           ) : (
             <>
@@ -40,7 +52,7 @@ export function GameOverScreen({ game, theme, onSelectTheme, openRules }: Screen
                 <>
                   <p className="body-14 text-muted">{leaders.length === 1 ? 'Najlepszy wynik:' : 'Remis na prowadzeniu:'}</p>
                   <Spacer h={4} />
-                  <p className="winner-list">{label(leaders)}</p>
+                  {people(leaders, 'winner-list', 'happy')}
                 </>
               ) : (
                 <p className="body-15 text-muted center">Nikt nie zdobył jeszcze punktów.</p>
@@ -50,7 +62,11 @@ export function GameOverScreen({ game, theme, onSelectTheme, openRules }: Screen
           <Spacer h={32} />
           <DarkCard className="full-width">
             <h3 className="card-heading">Finalna tabela wyników</h3>
-            <ScoreTable players={players} showAvatars />
+            <ScoreTable
+              players={players}
+              moods={Object.fromEntries(players.map((p) => [p.id, winnerIds.has(p.id) ? 'win' : endedByPoints ? 'sad' : 'idle']))}
+              showAvatars
+            />
           </DarkCard>
           <Spacer h={16} />
         </div>

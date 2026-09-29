@@ -2,6 +2,8 @@
 
 import { useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { PlayerAvatar } from '../avatars/PlayerAvatar'
+import type { AvatarMood } from '../avatars/characters'
 import { formatPoints, formatPointsDelta } from '../game/scoring'
 import type { Player } from '../game/types'
 import { BACK_PRIORITY_DIALOG, useBackHandler } from '../navigation/backHandler'
@@ -105,7 +107,9 @@ export function ImpostorGuessDialog({ players, onGuessResult, onDismiss, dismiss
                 setError(null)
               }}
             >
-              <span className="guess-avatar">{player.avatarEmoji}</span>
+              <span className="guess-avatar">
+                <PlayerAvatar avatar={player.avatarEmoji} size={34} mood={isSelected ? 'sneaky' : 'idle'} />
+              </span>
               <span className="guess-name">{player.name}</span>
               {isSelected && <span className="check">✓</span>}
             </button>
@@ -115,7 +119,10 @@ export function ImpostorGuessDialog({ players, onGuessResult, onDismiss, dismiss
       <div className="guess-footer">
         {selected && (
           <p className="guess-status">
-            {selected.avatarEmoji} {selected.name} zgaduje...
+            <span className="avatar-chip">
+              <PlayerAvatar avatar={selected.avatarEmoji} size={24} mood="sneaky" />
+              {selected.name} zgaduje...
+            </span>
           </p>
         )}
         {error && <p className="guess-error">{error}</p>}
@@ -139,9 +146,10 @@ type ScoreTableProps = {
   players: Player[]
   pointsDelta?: Record<string, number>
   showAvatars?: boolean
+  moods?: Record<string, AvatarMood>
 }
 
-export function ScoreTable({ players, pointsDelta = {}, showAvatars = false }: ScoreTableProps) {
+export function ScoreTable({ players, pointsDelta = {}, showAvatars = false, moods = {} }: ScoreTableProps) {
   const sorted = players.slice().sort((a, b) => b.score - a.score)
   return (
     <div className="score-table">
@@ -156,7 +164,11 @@ export function ScoreTable({ players, pointsDelta = {}, showAvatars = false }: S
         return (
           <div className="score-row" key={player.id}>
             <div className="score-left">
-              {showAvatars && <span className="score-avatar">{player.avatarEmoji}</span>}
+              {showAvatars && (
+                <span className="score-avatar">
+                  <PlayerAvatar avatar={player.avatarEmoji} size={30} mood={moods[player.id]} />
+                </span>
+              )}
               <span className="score-name">{player.name}</span>
             </div>
             <div className="score-right">

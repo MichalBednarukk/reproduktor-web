@@ -1,6 +1,7 @@
 // Czyste funkcje odwzorowujące GameViewModel.kt (Android).
 // Timer żyje w useGame.ts — tutaj tylko przejścia stanu.
 
+import { CHARACTER_IDS } from '../avatars/characters'
 import { DEFAULT_STATE, type GameSettings, type GameState, type Player, type SecretWord } from './types'
 import { pickWord } from './wordPicker'
 import { scoreImpostorGuess, scoreVotes } from './scoring'
@@ -39,9 +40,17 @@ const maxImpostorsFor = (playerCount: number) => Math.max(1, playerCount - 2)
 
 // ── Gracze ────────────────────────────────────────────────────────────────────
 
+/**
+ * Avatar dla nowego gracza. Najpierw wolne postacie (animowane, z AVATAR/), potem wolne emotki.
+ * Pole Player.avatarEmoji przechowuje id postaci (np. „pierozek”) albo emotkę.
+ */
 export function nextAvatarEmoji(players: Player[]): string {
   const used = new Set(players.map((p) => p.avatarEmoji))
-  return randomOf(AVATAR_POOL.filter((e) => !used.has(e))) ?? randomOf(AVATAR_POOL)!
+  return (
+    randomOf(CHARACTER_IDS.filter((c) => !used.has(c))) ??
+    randomOf(AVATAR_POOL.filter((e) => !used.has(e))) ??
+    randomOf(AVATAR_POOL)!
+  )
 }
 
 export function addPlayer(state: GameState, name: string): GameState | null {

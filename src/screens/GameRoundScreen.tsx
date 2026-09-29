@@ -3,6 +3,7 @@
 // Dialog wyjścia (✕) NIE pauzuje timera — tak jak na Androidzie.
 
 import { useEffect, useState } from 'react'
+import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AppBackground, CloseButton, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
 import { AlertDialog, ExitGameDialog, ImpostorGuessDialog, ScoreTable } from '../components/Dialogs'
 import { TopCornerActions } from '../components/TopCornerActions'
@@ -75,7 +76,7 @@ export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: Scree
                     <div className="starter-content">
                       <p className="body-12 text-muted">Rundę zaczyna</p>
                       <Spacer h={6} />
-                      <span className="emoji-44">{state.startingPlayer.avatarEmoji}</span>
+                      <PlayerAvatar avatar={state.startingPlayer.avatarEmoji} size={60} mood="happy" />
                       <Spacer h={4} />
                       <p className="starter-name">{state.startingPlayer.name}</p>
                       <Spacer h={6} />
