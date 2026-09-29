@@ -2,7 +2,7 @@
 // ReorderablePlayerList w PlayersScreen.kt. Działa palcem, myszką i strzałkami ↑/↓ na uchwycie;
 // przy krawędzi przewijanego kontenera lista sama się przewija.
 
-import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 
 type Props<T> = {
   items: T[]
@@ -19,10 +19,14 @@ type Drag = {
   startScroll: number
   clientY: number
   scroll: number
-  /** Środki wierszy (w układzie listy) i odstęp między kolejnymi wierszami. */
+  /** Góry i środki wierszy (w układzie listy) oraz odstęp między kolejnymi wierszami. */
+  tops: number[]
   mids: number[]
   slot: number
 }
+
+/** Po upuszczeniu: gracz dojeżdża z miejsca puszczenia do swojego slotu (bez przeskoku). */
+type Settle = { key: string; residual: number; animating: boolean }
 
 const EDGE_PX = 70
 const SCROLL_STEP = 12
@@ -31,6 +35,18 @@ export function ReorderableList<T>({ items, keyOf, onMove, renderItem, handleLab
   const listRef = useRef<HTMLDivElement>(null)
   const rowRefs = useRef<Array<HTMLDivElement | null>>([])
   const [drag, setDrag] = useState<Drag | null>(null)
+  const [settle, setSettle] = useState<Settle | null>(null)
+
+  // Klatka 1: gracz stoi tam, gdzie go puszczono (bez animacji); klatka 2: animuje do slotu.
+  useEffect(() => {
+    if (!settle) return
+    if (!settle.animating) {
+      const frame = requestAnimationFrame(() => setSettle((s) => (s ? { ...s, animating: true } : s)))
+      return () => cancelAnimationFrame(frame)
+    }
+    const handle = window.setTimeout(() => setSettle(null), 220)
+    return () => window.clearTimeout(handle)
+  }, [settle])
 
   const scroller = () => listRef.current?.closest<HTMLElement>('.scroll-area') ?? null
   const offsetOf = (d: Drag) => d.clientY - d.startY + (d.scroll - d.startScroll)
@@ -71,10 +87,12 @@ export function ReorderableList<T>({ items, keyOf, onMove, renderItem, handleLab
     if (rows.some((r) => !r)) return
     e.preventDefault()
     e.currentTarget.setPointerCapture(e.pointerId)
+    const tops = rows.map((r) => r!.offsetTop)
     const mids = rows.map((r) => r!.offsetTop + r!.offsetHeight / 2)
     const slot = rows.length > 1 ? rows[1]!.offsetTop - rows[0]!.offsetTop : rows[0]!.offsetHeight
     const scroll = scroller()?.scrollTop ?? 0
-    setDrag({ index, pointerId: e.pointerId, startY: e.clientY, clientY: e.clientY, startScroll: scroll, scroll, mids, slot })
+    setSettle(null)
+    setDrag({ index, pointerId: e.pointerId, startY: e.clientY, clientY: e.clientY, startScroll: scroll, scroll, tops, mids, slot })
   }
 
   const move = (e: PointerEvent<HTMLButtonElement>) => {
@@ -85,6 +103,8 @@ export function ReorderableList<T>({ items, keyOf, onMove, renderItem, handleLab
   const end = (e: PointerEvent<HTMLButtonElement>) => {
     if (!drag || e.pointerId !== drag.pointerId) return
     const to = targetIndex(drag)
+    const residual = drag.tops[drag.index] + offsetOf(drag) - drag.tops[to]
+    setSettle({ key: keyOf(items[drag.index]), residual, animating: false })
     setDrag(null)
     if (to !== drag.index) onMove(drag.index, to)
   }
@@ -110,9 +130,20 @@ export function ReorderableList<T>({ items, keyOf, onMove, renderItem, handleLab
           if (drag.index < index && index <= target) shift = -drag.slot
           else if (target <= index && index < drag.index) shift = drag.slot
         }
-        const style = dragging
-          ? { transform: `translateY(${offsetOf(drag)}px) scale(1.03)`, zIndex: 2, transition: 'none' }
-          : { transform: shift ? `translateY(${shift}px)` : undefined }
+        const settling = settle?.key === keyOf(item)
+        let style: CSSProperties
+        if (dragging) {
+          style = { transform: `translateY(${offsetOf(drag)}px) scale(1.03)`, zIndex: 2, transition: 'none' }
+        } else if (settling && !settle.animating) {
+          style = { transform: `translateY(${settle.residual}px) scale(1.03)`, zIndex: 2, transition: 'none' }
+        } else if (settling) {
+          style = { transform: 'none', zIndex: 2, transition: 'transform 200ms ease-out' }
+        } else if (settle && !settle.animating) {
+          // pozostali już stoją w nowych miejscach — bez animacji powrotu
+          style = { transition: 'none' }
+        } else {
+          style = { transform: shift ? `translateY(${shift}px)` : undefined }
+        }
         const handle = (
           <button
             type="button"

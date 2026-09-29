@@ -2005,7 +2005,7 @@ button:disabled {
   color: var(--muted);
 }
 
-/* „Moja rola” w trakcie rundy — zasłona z rolą na całym ekranie */
+/* „Sprawdź rolę” w trakcie rundy — zasłona z rolą na całym ekranie */
 .role-check-overlay {
   position: fixed;
   inset: 0;

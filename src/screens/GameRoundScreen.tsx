@@ -21,7 +21,7 @@ export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: Scree
   const { state, timerSeconds } = game
   const guessOpen = state.phase === 'IMPOSTOR_GUESS'
   const [activeDialog, setActiveDialog] = useState<RoundDialog>('none')
-  // „Moja rola”: gracz wybiera siebie i podgląda rolę pod zasłoną (timer stoi).
+  // „Sprawdź rolę”: gracz wybiera siebie i podgląda rolę pod zasłoną (timer stoi).
   const [checkingPlayer, setCheckingPlayer] = useState<Player | null>(null)
   const closeRoleCheck = () => {
     setCheckingPlayer(null)
@@ -107,7 +107,7 @@ export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: Scree
               📊 Tabela
             </button>
             <button type="button" className="small-outline" onClick={() => openDialog('rolePicker')}>
-              👁 Moja rola
+              👁 Sprawdź rolę
             </button>
             <button type="button" className="small-outline danger" onClick={() => openDialog('forceEnd')}>
               🏁 Koniec

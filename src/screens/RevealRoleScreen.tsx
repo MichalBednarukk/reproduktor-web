@@ -63,7 +63,7 @@ type PeekRevealProps = {
   onContinue: () => void
 }
 
-/** Zasłona z rolą — używana przy odkrywaniu ról i przy „Moja rola” w trakcie rundy. */
+/** Zasłona z rolą — używana przy odkrywaniu ról i przy „Sprawdź rolę” w trakcie rundy. */
 export function PeekReveal(props: PeekRevealProps) {
   const { isImpostor, word, hint, hintsEnabled, isAdvancing } = props
   const rootRef = useRef<HTMLDivElement>(null)
