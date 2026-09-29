@@ -9,6 +9,7 @@ import { AutoResizeText } from '../components/AutoResizeText'
 import { CloseButton, DarkCard, PrimaryButton, Spacer } from '../components/Basics'
 import type { ScreenProps } from './types'
 import { useExitGame } from './useExitGame'
+import { useViewportHeight } from '../platform/useViewportHeight'
 
 const MAX_LIFT_FRACTION = 0.48
 const LIFTED_THRESHOLD_PX = 50
@@ -77,6 +78,9 @@ export function PeekReveal(props: PeekRevealProps) {
 
   const lifted = Math.abs(offsetY) > LIFTED_THRESHOLD_PX
   const showConfirmation = hasViewedRole || isAdvancing
+  // Niski ekran: mniejszy avatar, żeby imię i przycisk się mieściły (max 220 px).
+  const viewportHeight = useViewportHeight()
+  const coverAvatarSize = Math.min(220, Math.max(110, viewportHeight - 470))
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (drag.current || (e.target as HTMLElement).closest('button')) return
@@ -206,7 +210,7 @@ export function PeekReveal(props: PeekRevealProps) {
             Gracz {props.playerIdx} z {props.playerCount}
           </p>
           <Spacer h={16} />
-          <PlayerAvatar avatar={props.avatar} size={220} mood={showConfirmation ? 'happy' : 'idle'} />
+          <PlayerAvatar avatar={props.avatar} size={coverAvatarSize} mood={showConfirmation ? 'happy' : 'idle'} />
           <div className="flex-1" />
           {showConfirmation ? (
             <div className="reveal-confirmation">

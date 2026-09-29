@@ -5,12 +5,14 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { AvatarMood } from '../avatars/characters'
+import { fitAvatarSize } from '../avatars/fitAvatarSize'
 import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AppBackground, CloseButton, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
 import { AlertDialog, ExitGameDialog, ImpostorGuessDialog, PlayerPickerDialog, ScoreTable } from '../components/Dialogs'
 import { TopCornerActions } from '../components/TopCornerActions'
 import type { Player } from '../game/types'
 import { BACK_PRIORITY_DIALOG, useBackHandler } from '../navigation/backHandler'
+import { useElementSize } from '../platform/useElementSize'
 import { PeekReveal } from './RevealRoleScreen'
 import type { ScreenProps } from './types'
 
@@ -25,19 +27,54 @@ const randomMoods = (players: Player[]): Record<string, AvatarMood> =>
   Object.fromEntries(players.map((p) => [p.id, PARTY_MOODS[Math.floor(Math.random() * PARTY_MOODS.length)]]))
 
 /** Wszyscy gracze w wolnym miejscu rundy — co 3 s każdy dostaje losową reakcję (niezależnie od ról). */
-function PlayersParty({ players }: { players: Player[] }) {
+function PlayersParty({ players, width, height }: { players: Player[]; width: number; height: number }) {
   const [moods, setMoods] = useState(() => randomMoods(players))
   useEffect(() => {
     const handle = window.setInterval(() => setMoods(randomMoods(players)), PARTY_INTERVAL_MS)
     return () => window.clearInterval(handle)
   }, [players])
-  const size = players.length <= 4 ? 100 : players.length <= 6 ? 84 : players.length <= 9 ? 70 : 60
+  const size = fitAvatarSize(players.length, width, height, 100, 14, 12)
   return (
     <div className="avatar-row party">
       {players.map((p) => (
         <PlayerAvatar key={p.id} avatar={p.avatarEmoji} size={size} mood={moods[p.id] ?? 'idle'} />
       ))}
     </div>
+  )
+}
+
+/**
+ * Karta „Rundę zaczyna” w wolnym miejscu nad przyciskami. Avatar jest tak duży, jak pozwala miejsce;
+ * na niskich ekranach karta układa się poziomo, żeby nic nie wypychała poza ekran.
+ */
+function StarterBanner({ starter, height }: { starter: Player; height: number }) {
+  const vertical = height >= 220
+  if (vertical) {
+    return (
+      <DarkCard className="full-width starter-card">
+        <div className="starter-content">
+          <p className="body-12 text-muted">Rundę zaczyna</p>
+          <Spacer h={6} />
+          <PlayerAvatar avatar={starter.avatarEmoji} size={Math.min(150, Math.max(90, height - 130))} mood="happy" loop />
+          <Spacer h={4} />
+          <p className="starter-name">{starter.name}</p>
+          <Spacer h={6} />
+          <p className="body-13 text-secondary center">To Ty podajesz pierwsze skojarzenie.</p>
+        </div>
+      </DarkCard>
+    )
+  }
+  return (
+    <DarkCard className="full-width starter-card" padding={14}>
+      <div className="starter-row">
+        <PlayerAvatar avatar={starter.avatarEmoji} size={Math.min(110, Math.max(56, height - 30))} mood="happy" loop />
+        <div className="starter-row-text">
+          <p className="body-12 text-muted">Rundę zaczyna</p>
+          <p className="starter-name left">{starter.name}</p>
+          <p className="body-12 text-secondary">To Ty podajesz pierwsze skojarzenie.</p>
+        </div>
+      </div>
+    </DarkCard>
   )
 }
 
@@ -77,6 +114,7 @@ export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: Scree
     else setActiveDialog('exitGame')
   })
 
+  const [measureFreeSpace, freeSpace] = useElementSize<HTMLDivElement>()
   const minutes = Math.floor(timerSeconds / 60)
   const seconds = timerSeconds % 60
   const timerClass = timerSeconds <= 10 ? 'danger' : timerSeconds <= 30 ? 'warning' : ''
@@ -88,44 +126,33 @@ export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: Scree
           <Spacer h={16} />
           <p className="body-17 text-secondary">Runda {state.roundNumber}</p>
           <Spacer h={8} />
-          <span className="emoji-36">⏱️</span>
+          <span className="emoji-36 round-timer-emoji">⏱️</span>
           <Spacer h={4} />
           <p className={`round-timer ${timerClass}`}>
+            <span className="round-timer-inline-emoji">⏱️ </span>
             {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
           </p>
-          <Spacer h={24} />
-          <DarkCard className="full-width">
+          <div className="round-gap" />
+          <DarkCard className="full-width round-hint-card">
             <p className="body-15 text-secondary center">
               Mówcie po kolei słowa kojarzące się z tajnym hasłem.
               <br />
               Nie zdradzajcie go wprost!
             </p>
           </DarkCard>
-          <div className={`starter-banner ${showStarterBanner ? 'visible' : ''}`}>
-            <div className="starter-banner-inner">
-              {state.startingPlayer && (
-                <>
-                  <Spacer h={12} />
-                  <DarkCard className="full-width">
-                    <div className="starter-content">
-                      <p className="body-12 text-muted">Rundę zaczyna</p>
-                      <Spacer h={6} />
-                      <PlayerAvatar avatar={state.startingPlayer.avatarEmoji} size={150} mood="happy" loop />
-                      <Spacer h={4} />
-                      <p className="starter-name">{state.startingPlayer.name}</p>
-                      <Spacer h={6} />
-                      <p className="body-13 text-secondary center">To Ty podajesz pierwsze skojarzenie.</p>
-                    </div>
-                  </DarkCard>
-                </>
-              )}
-            </div>
+          {/* Wolne miejsce: najpierw karta „Rundę zaczyna” (znika po 10 s), potem tłum graczy. */}
+          <div className="flex-1 party-space" ref={measureFreeSpace}>
+            {freeSpace.height > 0 &&
+              (showStarterBanner && state.startingPlayer ? (
+                <StarterBanner starter={state.startingPlayer} height={freeSpace.height} />
+              ) : (
+                <PlayersParty players={state.players} width={freeSpace.width} height={freeSpace.height} />
+              ))}
           </div>
-          <div className="flex-1 party-space">{!showStarterBanner && <PlayersParty players={state.players} />}</div>
           <PrimaryButton onClick={game.openImpostorGuess}>🥷 Reproduktor zgaduje</PrimaryButton>
           <Spacer h={10} />
           <SecondaryButton onClick={() => openDialog('endRoundConfirm')}>🗳️ Zakończ rundę i głosuj</SecondaryButton>
-          <Spacer h={16} />
+          <div className="round-gap-small" />
           <div className="round-small-buttons">
             <button type="button" className="small-outline" onClick={() => openDialog('scoreTable')}>
               📊 Tabela
