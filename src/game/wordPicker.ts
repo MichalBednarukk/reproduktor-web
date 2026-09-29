@@ -1,7 +1,7 @@
 ﻿import type { Category, SecretWord, WordsPayload } from './types'
 
 export async function loadWords(): Promise<{ categories: Category[]; wordsByCategory: Record<string, SecretWord[]> }> {
-  const url = `${import.meta.env.BASE_URL}reproduktor_words_v3.min.json`
+  const url = `${import.meta.env.BASE_URL}reproduktor_words_v4.min.json`
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error('Nie udało się wczytać bazy haseł.')
