@@ -49,13 +49,19 @@ export function ReorderableList<T>({ items, keyOf, onMove, renderItem, handleLab
   }, [settle])
 
   const scroller = () => listRef.current?.closest<HTMLElement>('.scroll-area') ?? null
-  const offsetOf = (d: Drag) => d.clientY - d.startY + (d.scroll - d.startScroll)
+  /** Przesunięcie przeciąganego wiersza — tylko w obrębie listy (inaczej wiersz powiększałby obszar przewijania). */
+  const offsetOf = (d: Drag) => {
+    const raw = d.clientY - d.startY + (d.scroll - d.startScroll)
+    const min = d.tops[0] - d.tops[d.index]
+    const max = d.tops[d.tops.length - 1] - d.tops[d.index]
+    return Math.min(max, Math.max(min, raw))
+  }
 
   function targetIndex(d: Drag) {
     const center = d.mids[d.index] + offsetOf(d)
     let target = d.index
-    while (target < d.mids.length - 1 && center > d.mids[target + 1]) target++
-    while (target > 0 && center < d.mids[target - 1]) target--
+    while (target < d.mids.length - 1 && center >= d.mids[target + 1]) target++
+    while (target > 0 && center <= d.mids[target - 1]) target--
     return target
   }
 
