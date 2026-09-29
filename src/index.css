@@ -1966,3 +1966,41 @@ button:disabled {
   88% { transform: rotate(-5deg); }
   94% { transform: rotate(3deg); }
 }
+
+/* ── Przestawianie kolejności graczy (ReorderableList) ─────────────────── */
+
+.reorder-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.reorder-row {
+  position: relative;
+  transition: transform 160ms ease;
+}
+
+.reorder-row.dragging .player-card {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  border-color: var(--primary);
+}
+
+.drag-handle {
+  color: var(--muted);
+  font-size: 22px;
+  touch-action: none;
+  cursor: grab;
+}
+
+.reorder-row.dragging .drag-handle {
+  cursor: grabbing;
+  color: var(--primary);
+}
+
+.reorder-hint {
+  margin-bottom: 6px;
+  padding-left: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--muted);
+}

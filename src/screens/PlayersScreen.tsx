@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { AppBackground, BottomBar, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
 import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AlertDialog } from '../components/Dialogs'
+import { ReorderableList } from '../components/ReorderableList'
 import { TopCornerActions } from '../components/TopCornerActions'
 import { MAX_PLAYER_NAME_LENGTH, MAX_PLAYERS, MIN_PLAYERS } from '../game/gameEngine'
 import type { ScreenProps } from './types'
@@ -89,16 +90,20 @@ export function PlayersScreen({ game, theme, onSelectTheme, openRules }: ScreenP
           </p>
           {errorMsg && <p className="input-error">{errorMsg}</p>}
           <Spacer h={16} />
-          {players
-            .slice()
-            .reverse()
-            .map((player) => (
-              <DarkCard key={player.id} padding={4} radius={20} className="player-card">
+          {players.length > 1 && <p className="reorder-hint">Kolejność = kolejność podawania telefonu. Przeciągnij ☰, aby zmienić.</p>}
+          <ReorderableList
+            items={players}
+            keyOf={(p) => p.id}
+            onMove={game.movePlayer}
+            handleLabel={(p) => `Przesuń ${p.name}`}
+            renderItem={(player, handle) => (
+              <DarkCard padding={4} radius={20} className="player-card">
                 <div className="player-row">
                   <span className="player-avatar">
                     <PlayerAvatar avatar={player.avatarEmoji} size={64} mood={player.name === justAdded ? 'happy' : 'idle'} />
                   </span>
                   <span className="player-name">{player.name}</span>
+                  {players.length > 1 && handle}
                   <button
                     type="button"
                     className="icon-btn remove-player"
@@ -109,7 +114,8 @@ export function PlayersScreen({ game, theme, onSelectTheme, openRules }: ScreenP
                   </button>
                 </div>
               </DarkCard>
-            ))}
+            )}
+          />
           <Spacer h={16} />
         </div>
         <TopCornerActions side="end" theme={theme} onSelectTheme={onSelectTheme} onInfoClick={() => openRules()} />

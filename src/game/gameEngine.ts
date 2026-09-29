@@ -79,6 +79,15 @@ export function removePlayer(state: GameState, playerId: string): GameState {
   }
 }
 
+/** Przestawia gracza z pozycji [from] na [to] (kolejność = kolejność podawania telefonu). */
+export function movePlayer(state: GameState, from: number, to: number): GameState {
+  const players = state.players.slice()
+  if (from === to || from < 0 || to < 0 || from >= players.length || to >= players.length) return state
+  const [moved] = players.splice(from, 1)
+  players.splice(to, 0, moved)
+  return { ...state, players }
+}
+
 // ── Ustawienia ────────────────────────────────────────────────────────────────
 
 export function updateSettings(state: GameState, next: Partial<GameSettings>): GameState {

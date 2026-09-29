@@ -111,6 +111,11 @@ export function useGame() {
         commit(next)
         persistPlayers(next)
       },
+      movePlayer(from: number, to: number) {
+        const next = engine.movePlayer(get(), from, to)
+        commit(next)
+        persistPlayers(next)
+      },
       removeAllPlayers() {
         commit({ ...get(), players: [] })
         appStorage.clearPlayers()

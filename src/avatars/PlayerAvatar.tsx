@@ -55,7 +55,7 @@ function EmojiAvatar({ emoji, size, mood, loop }: { emoji: string; size: number;
   }, [mood, loop, size])
 
   return (
-    <span className="avatar-emoji" ref={rootRef} style={{ width: size, height: size, fontSize: size * 0.78 }} aria-hidden="true">
+    <span className="avatar-emoji" ref={rootRef} style={{ width: size, height: size, fontSize: size * 0.72 }} aria-hidden="true">
       <span className="avatar-emoji-inner" ref={innerRef}>
         {emoji}
       </span>
