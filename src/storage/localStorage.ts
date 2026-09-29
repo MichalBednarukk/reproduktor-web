@@ -1,59 +1,61 @@
-﻿import type { AppThemeKey, GameSettings, Player } from '../game/types'
+// Odpowiednik PlayerStorage / OnboardingStorage / AppSettingsStorage z Androida.
+// Jak na Androidzie: zapisujemy tylko graczy (imię + avatar), motyw i flagę onboardingu.
+// Ustawienia gry NIE są zapamiętywane (Android też ich nie zapisuje).
+
+import type { AppThemeKey } from '../theme/themes'
+import type { Player } from '../game/types'
 
 const KEYS = {
   players: 'reproduktor.players',
-  settings: 'reproduktor.settings',
   theme: 'reproduktor.theme',
   onboardingSeen: 'reproduktor.onboarding.seen',
 } as const
 
 type SavedPlayer = { name: string; avatarEmoji: string }
 
+function read(key: string): string | null {
+  try {
+    return localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+function write(key: string, value: string | null) {
+  try {
+    if (value === null) localStorage.removeItem(key)
+    else localStorage.setItem(key, value)
+  } catch {
+    // tryb prywatny / zablokowany storage — gra działa dalej bez zapisu
+  }
+}
+
 export const appStorage = {
   savePlayers(players: Player[]) {
     const saved: SavedPlayer[] = players.map((p) => ({ name: p.name, avatarEmoji: p.avatarEmoji }))
-    localStorage.setItem(KEYS.players, JSON.stringify(saved))
+    write(KEYS.players, JSON.stringify(saved))
   },
 
-  loadPlayers(): SavedPlayer[] {
+  /** Każdy gracz dostaje nowe id i score = 0 (jak PlayerStorage.loadPlayers). */
+  loadPlayers(): Player[] {
     try {
-      const raw = localStorage.getItem(KEYS.players)
-      if (!raw) return []
-      const parsed = JSON.parse(raw) as SavedPlayer[]
-      return parsed.filter((p) => p.name && p.avatarEmoji)
+      const parsed = JSON.parse(read(KEYS.players) ?? '[]') as SavedPlayer[]
+      if (!Array.isArray(parsed)) return []
+      return parsed
+        .filter((p) => typeof p?.name === 'string' && typeof p?.avatarEmoji === 'string' && p.name.trim())
+        .map((p) => ({ id: crypto.randomUUID(), name: p.name, avatarEmoji: p.avatarEmoji, score: 0 }))
     } catch {
       return []
     }
   },
 
-  saveSettings(settings: GameSettings) {
-    localStorage.setItem(KEYS.settings, JSON.stringify(settings))
+  clearPlayers() {
+    write(KEYS.players, null)
   },
 
-  loadSettings(): GameSettings | null {
-    try {
-      const raw = localStorage.getItem(KEYS.settings)
-      return raw ? (JSON.parse(raw) as GameSettings) : null
-    } catch {
-      return null
-    }
-  },
+  loadTheme: (): string | null => read(KEYS.theme),
+  saveTheme: (theme: AppThemeKey) => write(KEYS.theme, theme),
 
-  saveTheme(theme: AppThemeKey) {
-    localStorage.setItem(KEYS.theme, theme)
-  },
-
-  loadTheme(): AppThemeKey {
-    const value = localStorage.getItem(KEYS.theme)
-    if (value === 'classic' || value === 'pride' || value === 'forest') return value
-    return 'classic'
-  },
-
-  markOnboardingSeen() {
-    localStorage.setItem(KEYS.onboardingSeen, '1')
-  },
-
-  hasSeenOnboarding(): boolean {
-    return localStorage.getItem(KEYS.onboardingSeen) === '1'
-  },
+  hasSeenOnboarding: () => read(KEYS.onboardingSeen) === '1',
+  markOnboardingSeen: () => write(KEYS.onboardingSeen, '1'),
 }

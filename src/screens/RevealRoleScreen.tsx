@@ -1,181 +1,251 @@
-﻿import { useMemo, useRef, useState, type PointerEvent } from 'react'
-import { PrimaryButton } from '../components/PrimaryButton'
-import type { RevealRoleScreenProps } from './types'
+// Odpowiednik RevealRoleScreen.kt (PeekRevealScreen):
+// rola leży pod zasłoną; gracz przesuwa zasłonę w górę (max 48% ekranu) i przytrzymuje.
+// Rola liczy się jako „obejrzana”, gdy dolna krawędź zasłony minie środek hasła/wskazówki.
+// Po puszczeniu zasłona wraca, a na niej pojawia się „Zapamiętałeś swoją rolę?”.
 
-export function RevealRoleScreen({ state, theme, onContinue, onExit }: RevealRoleScreenProps) {
+import { useRef, useState, type PointerEvent } from 'react'
+import { AutoResizeText } from '../components/AutoResizeText'
+import { CloseButton, DarkCard, PrimaryButton, Spacer } from '../components/Basics'
+import type { ScreenProps } from './types'
+import { useExitGame } from './useExitGame'
+
+const MAX_LIFT_FRACTION = 0.48
+const LIFTED_THRESHOLD_PX = 50
+
+export function RevealRoleScreen({ game }: ScreenProps) {
+  const { state } = game
   const current = state.players[state.currentRevealIndex]
-  const isImpostor = !!current && state.currentImpostorIds.has(current.id)
-  const hint = current ? (state.currentImpostorHints[current.id] ?? '') : ''
+  const { openExitDialog, exitDialog } = useExitGame(game)
+  const [isAdvancing, setIsAdvancing] = useState(false)
+
+  if (!current) return null
+
+  const isImpostor = state.currentImpostorIds.has(current.id)
+  const hint = state.currentImpostorHints[current.id] ?? ''
+
+  return (
+    <>
+      <PeekReveal
+        key={current.id}
+        playerName={current.name}
+        playerIdx={state.currentRevealIndex + 1}
+        playerCount={state.players.length}
+        isImpostor={isImpostor}
+        word={state.currentSecretWord?.word ?? '?'}
+        hint={hint}
+        hintsEnabled={state.settings.hintsEnabled}
+        isAdvancing={isAdvancing}
+        onExitGame={openExitDialog}
+        onContinue={() => {
+          setIsAdvancing(true)
+          game.revealAndContinue()
+        }}
+      />
+      {exitDialog}
+    </>
+  )
+}
+
+type PeekRevealProps = {
+  playerName: string
+  playerIdx: number
+  playerCount: number
+  isImpostor: boolean
+  word: string
+  hint: string
+  hintsEnabled: boolean
+  isAdvancing: boolean
+  onExitGame: () => void
+  onContinue: () => void
+}
+
+function PeekReveal(props: PeekRevealProps) {
+  const { isImpostor, word, hint, hintsEnabled, isAdvancing } = props
+  const rootRef = useRef<HTMLDivElement>(null)
+  const readableRef = useRef<HTMLDivElement>(null)
+  const drag = useRef<{ pointerId: number; startY: number; startOffset: number; minOffset: number; midY: number } | null>(null)
+  const passedThreshold = useRef(false)
 
   const [offsetY, setOffsetY] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [hasViewedRole, setHasViewedRole] = useState(false)
 
-  const startYRef = useRef<number | null>(null)
-  const offsetYRef = useRef(0)
-  const minOffsetRef = useRef(-420)
-  const returnTimerRef = useRef<number | null>(null)
+  const lifted = Math.abs(offsetY) > LIFTED_THRESHOLD_PX
+  const showConfirmation = hasViewedRole || isAdvancing
 
-  const roleContent = useMemo(() => {
-    if (!current) {
-      return (
-        <section className="revealed-panel">
-          <p className="giant-emoji">❓</p>
-          <h2>Brak gracza</h2>
-          <p className="hint">Nie udało się odczytać aktualnego gracza.</p>
-        </section>
-      )
+  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    if (drag.current || (e.target as HTMLElement).closest('button')) return
+    const root = rootRef.current
+    const readable = readableRef.current
+    if (!root) return
+    const rootRect = root.getBoundingClientRect()
+    const readableRect = readable?.getBoundingClientRect()
+    drag.current = {
+      pointerId: e.pointerId,
+      startY: e.clientY,
+      startOffset: offsetY,
+      minOffset: -rootRect.height * MAX_LIFT_FRACTION,
+      midY: readableRect ? readableRect.top - rootRect.top + readableRect.height / 2 : Number.NEGATIVE_INFINITY,
     }
-
-    if (isImpostor) {
-      return (
-        <section className="revealed-panel">
-          <p className="giant-emoji">🥷</p>
-          <h2 style={{ color: theme.error }}>Reproduktor</h2>
-
-          {state.settings.hintsEnabled && hint ? (
-            <>
-              <p className="hint-title">💡 Wskazówka</p>
-              <p className="hint-word">{hint}</p>
-            </>
-          ) : (
-            <p className="hint">
-              Nie znasz tajnego hasła. Słuchaj uważnie i spróbuj je odtworzyć.
-            </p>
-          )}
-        </section>
-      )
-    }
-
-    return (
-      <section className="revealed-panel">
-        <p className="hint">Twoje tajne słowo to:</p>
-        <h2 className="secret-word">{state.currentSecretWord?.word ?? 'Brak hasła'}</h2>
-        <p className="hint">Zapamiętaj i nie pokazuj nikomu.</p>
-      </section>
-    )
-  }, [
-    current,
-    hint,
-    isImpostor,
-    state.currentSecretWord?.word,
-    state.settings.hintsEnabled,
-    theme.error,
-  ])
-
-  const setCoverOffset = (value: number) => {
-    offsetYRef.current = value
-    setOffsetY(value)
-  }
-
-  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (hasViewedRole) return
-
-    if (returnTimerRef.current) {
-      window.clearTimeout(returnTimerRef.current)
-      returnTimerRef.current = null
-    }
-
-    const screenHeight = window.innerHeight || document.documentElement.clientHeight || 760
-    minOffsetRef.current = -Math.max(340, Math.floor(screenHeight * 0.58))
-
-    startYRef.current = event.clientY
+    e.currentTarget.setPointerCapture(e.pointerId)
     setIsDragging(true)
-
-    event.currentTarget.setPointerCapture?.(event.pointerId)
   }
 
-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (hasViewedRole) return
-    if (!isDragging || startYRef.current == null) return
-
-    event.preventDefault()
-
-    const delta = event.clientY - startYRef.current
-    const nextOffset = Math.max(minOffsetRef.current, Math.min(0, delta))
-
-    setCoverOffset(nextOffset)
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    const d = drag.current
+    if (!d || d.pointerId !== e.pointerId) return
+    const next = Math.min(0, Math.max(d.minOffset, d.startOffset + (e.clientY - d.startY)))
+    setOffsetY(next)
+    const height = rootRef.current?.clientHeight ?? 0
+    if (!passedThreshold.current && height + next <= d.midY) passedThreshold.current = true
   }
 
-  const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
-    if (hasViewedRole) return
-    if (startYRef.current == null) return
-
-    event.currentTarget.releasePointerCapture?.(event.pointerId)
-
-    const minOffset = minOffsetRef.current
-    const readableThreshold = Math.abs(minOffset) * 0.55
-    const wasReadable = Math.abs(offsetYRef.current) >= readableThreshold
-
-    startYRef.current = null
+  const onPointerEnd = (e: PointerEvent<HTMLDivElement>) => {
+    const d = drag.current
+    if (!d || d.pointerId !== e.pointerId) return
+    drag.current = null
+    if (passedThreshold.current) setHasViewedRole(true)
+    passedThreshold.current = false
     setIsDragging(false)
-
-    // Najpierw zasłona wraca na dół.
-    setCoverOffset(0)
-
-    // Dopiero po powrocie zasłony zmieniamy jej zawartość na confirmation.
-    if (wasReadable) {
-      returnTimerRef.current = window.setTimeout(() => {
-        setHasViewedRole(true)
-        returnTimerRef.current = null
-      }, 240)
-    }
+    setOffsetY(0)
   }
+
+  const hintText = hint.trim()
 
   return (
-    <div className="screen reveal-screen">
-      <button className="close-btn reveal-close-btn" onClick={onExit} type="button">
-        ✕
-      </button>
-
-      {/* WARSTWA POD SPODEM — tutaj jest WYŁĄCZNIE rola/hasło */}
-      <div className="reveal-under-layer">
-        <div className="reveal-role-content">
-          {roleContent}
+    <div className="screen reveal-root" ref={rootRef}>
+      {/* Warstwa pod zasłoną — rola */}
+      <div className="reveal-under">
+        <div className="reveal-role">
+          {isImpostor ? (
+            <>
+              <span className="emoji-72">🥷</span>
+              <Spacer h={12} />
+              {hintsEnabled && hintText ? (
+                <>
+                  <p className="impostor-title">Reproduktor</p>
+                  <Spacer h={16} />
+                  <DarkCard padding={16} className="full-width">
+                    <p className="body-12 text-muted center">💡 Wskazówka</p>
+                    <Spacer h={6} />
+                    <div ref={readableRef}>
+                      <AutoResizeText
+                        text={hintText}
+                        maxFontSize={22}
+                        minFontSize={15}
+                        maxLines={1}
+                        lineHeightMultiplier={1.28}
+                        className="hint-text"
+                      />
+                    </div>
+                  </DarkCard>
+                </>
+              ) : (
+                <>
+                  <div ref={readableRef} className="full-width">
+                    <p className="impostor-title">Reproduktor</p>
+                  </div>
+                  <Spacer h={12} />
+                  <p className="body-15 text-secondary center">
+                    Nie znasz tajnego hasła.
+                    <br />
+                    Słuchaj uważnie i spróbuj je odtworzyć.
+                  </p>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="body-14 text-muted center">Twoje tajne słowo to:</p>
+              <Spacer h={10} />
+              <div ref={readableRef} className="full-width">
+                <AutoResizeText
+                  text={word.trim()}
+                  maxFontSize={46}
+                  minFontSize={22}
+                  maxLines={4}
+                  lineHeightMultiplier={1.2}
+                  className="secret-word-text"
+                />
+              </div>
+              <Spacer h={10} />
+              <p className="body-14 text-muted center">Zapamiętaj i nie pokazuj nikomu.</p>
+            </>
+          )}
         </div>
       </div>
 
-      {/* WARSTWA ZASŁONY — tutaj jest albo kłódka, albo confirmation */}
+      {/* Zasłona */}
       <div
-        className={`reveal-cover ${isDragging ? 'is-dragging' : ''}`}
+        className={`reveal-cover ${isDragging ? 'dragging' : ''}`}
         style={{ transform: `translateY(${offsetY}px)` }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerEnd}
+        onPointerCancel={onPointerEnd}
       >
-        {hasViewedRole ? (
-          <div className="remember-block">
-            <p className="giant-emoji eye-icon">👁</p>
-            <h3>Zapamiętałeś swoją rolę?</h3>
-            <p>Możesz teraz przekazać telefon.</p>
-            <PrimaryButton theme={theme} onClick={onContinue}>
-              Kontynuuj →
-            </PrimaryButton>
-          </div>
-        ) : (
-          <div className="cover-lock-content">
-            <div className="cover-player-header">
-              <h2 className="fit-name">{current?.name ?? '?'}</h2>
-              <p className="hint">
-                Gracz {state.currentRevealIndex + 1} z {state.players.length}
+        <div className="reveal-cover-content">
+          <Spacer h={56} />
+          <AutoResizeText
+            text={props.playerName.trim()}
+            maxFontSize={44}
+            minFontSize={28}
+            maxLines={2}
+            lineHeightMultiplier={1.18}
+            className="name-text"
+          />
+          <Spacer h={6} />
+          <p className="reveal-counter">
+            Gracz {props.playerIdx} z {props.playerCount}
+          </p>
+          <div className="flex-1" />
+          {showConfirmation ? (
+            <div className="reveal-confirmation">
+              <span className="emoji-64">👁</span>
+              <Spacer h={20} />
+              <h2 className="reveal-card-title">Zapamiętałeś swoją rolę?</h2>
+              <Spacer h={10} />
+              <p className="body-14 text-secondary center">Możesz teraz przekazać telefon.</p>
+              <Spacer h={32} />
+              <PrimaryButton onClick={props.onContinue} disabled={isAdvancing}>
+                Kontynuuj →
+              </PrimaryButton>
+            </div>
+          ) : (
+            <div className="reveal-instruction">
+              <span className="emoji-56">🔒</span>
+              <Spacer h={20} />
+              <h2 className="reveal-card-title">Twoja rola jest ukryta</h2>
+              <Spacer h={12} />
+              <p className="body-15 text-secondary center lh-24">
+                Przesuń w górę i przytrzymaj,
+                <br />
+                aby podejrzeć rolę.
               </p>
+              <Spacer h={20} />
+              <div className="instruction-divider" />
+              <Spacer h={16} />
+              <p className="body-12 text-muted center">Nie pokazuj ekranu innym graczom</p>
             </div>
-
-            <div className="cover-lock-main">
-              <p className="lock">🔒</p>
-              <p className="cover-title">Twoja rola jest ukryta</p>
-            </div>
-
-            <div className="swipe-hint">
-              <p>Przesuń w górę i przytrzymaj, aby podejrzeć rolę.</p>
-              <span>︿</span>
-              <span>︿</span>
-              <span>︿</span>
-            </div>
-          </div>
-        )}
+          )}
+          <div className="flex-1" />
+          {!showConfirmation && <SwipeHint lifted={lifted} />}
+          <Spacer h={28} />
+        </div>
+        <CloseButton onClick={props.onExitGame} />
       </div>
+    </div>
+  )
+}
+
+function SwipeHint({ lifted }: { lifted: boolean }) {
+  return (
+    <div className={`swipe-hint ${lifted ? 'lifted' : ''}`}>
+      <span className="chevron c1">∧</span>
+      <span className="chevron c2">∧</span>
+      <span className="chevron c3">∧</span>
+      <Spacer h={10} />
+      <span className="swipe-handle" />
     </div>
   )
 }

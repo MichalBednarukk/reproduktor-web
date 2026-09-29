@@ -1,32 +1,89 @@
-﻿import { DEFAULT_STATE, type GameSettings, type GameState, type Player, type RoundResult, type SecretWord } from './types'
+// Czyste funkcje odwzorowujące GameViewModel.kt (Android).
+// Timer żyje w useGame.ts — tutaj tylko przejścia stanu.
+
+import { DEFAULT_STATE, type GameSettings, type GameState, type Player, type SecretWord } from './types'
 import { pickWord } from './wordPicker'
 import { scoreImpostorGuess, scoreVotes } from './scoring'
 
 const MIN_HINT_HISTORY_SIZE = 6
 const MAX_HINT_HISTORY_SIZE = 24
 
-export const AVATAR_POOL = ['😀', '😎', '🤠', '🥳', '🤓', '😇', '🤩', '😈', '👻', '🤖', '🐽', '🦊']
+export const MAX_PLAYERS = 12
+export const MIN_PLAYERS = 3
+export const MAX_PLAYER_NAME_LENGTH = 30
 
-export function createInitialState(players: Player[] = [], settings: GameSettings = DEFAULT_STATE.settings): GameState {
-  return {
-    ...DEFAULT_STATE,
-    players,
-    settings,
+export const AVATAR_POOL = ['😀', '😎', '🤠', '🥳', '🤓', '😇', '🤩', '😈', '👻', '🤖', '🐼', '🦊']
+
+export const ROUND_DURATIONS = [
+  60, 120, 180, 300, 360, 420, 480, 540, 600, 660,
+  720, 780, 840, 900, 960, 1020, 1080, 1140, 1200,
+]
+
+export function shuffled<T>(items: readonly T[]): T[] {
+  const result = items.slice()
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
   }
+  return result
 }
+
+const randomOf = <T,>(items: readonly T[]): T | undefined =>
+  items.length > 0 ? items[Math.floor(Math.random() * items.length)] : undefined
+
+export function createInitialState(players: Player[] = []): GameState {
+  return { ...DEFAULT_STATE, players }
+}
+
+const maxImpostorsFor = (playerCount: number) => Math.max(1, playerCount - 2)
+
+// ── Gracze ────────────────────────────────────────────────────────────────────
 
 export function nextAvatarEmoji(players: Player[]): string {
   const used = new Set(players.map((p) => p.avatarEmoji))
-  const available = AVATAR_POOL.filter((emoji) => !used.has(emoji))
-  if (available.length > 0) {
-    return available[Math.floor(Math.random() * available.length)]
-  }
-  return AVATAR_POOL[Math.floor(Math.random() * AVATAR_POOL.length)]
+  return randomOf(AVATAR_POOL.filter((e) => !used.has(e))) ?? randomOf(AVATAR_POOL)!
 }
+
+export function addPlayer(state: GameState, name: string): GameState | null {
+  const trimmed = name.trim()
+  if (!trimmed) return null
+  if (state.players.length >= MAX_PLAYERS) return null
+  if (state.players.some((p) => p.name.toLocaleLowerCase() === trimmed.toLocaleLowerCase())) return null
+  const player: Player = {
+    id: crypto.randomUUID(),
+    name: trimmed,
+    score: 0,
+    avatarEmoji: nextAvatarEmoji(state.players),
+  }
+  return { ...state, players: [...state.players, player] }
+}
+
+export function removePlayer(state: GameState, playerId: string): GameState {
+  const players = state.players.filter((p) => p.id !== playerId)
+  return {
+    ...state,
+    players,
+    settings: {
+      ...state.settings,
+      impostorCount: Math.min(state.settings.impostorCount, maxImpostorsFor(players.length)),
+    },
+  }
+}
+
+// ── Ustawienia ────────────────────────────────────────────────────────────────
+
+export function updateSettings(state: GameState, next: Partial<GameSettings>): GameState {
+  const merged = { ...state.settings, ...next }
+  merged.impostorCount = Math.max(1, Math.min(maxImpostorsFor(state.players.length), merged.impostorCount))
+  merged.pointsToWin = Math.max(3, Math.min(20, merged.pointsToWin))
+  return { ...state, settings: merged }
+}
+
+// ── Losowanie ─────────────────────────────────────────────────────────────────
 
 const normalizeHint = (hint: string) => hint.trim().toLocaleLowerCase()
 
-const uniqueRuntimeHints = (word: SecretWord): string[] => {
+function uniqueRuntimeHints(word: SecretWord): string[] {
   const seen = new Set<string>()
   const result: string[] = []
   for (const raw of word.hints ?? []) {
@@ -40,61 +97,43 @@ const uniqueRuntimeHints = (word: SecretWord): string[] => {
   return result
 }
 
-const historySizeFor = (impostorCount: number): number =>
+const historySizeFor = (impostorCount: number) =>
   Math.max(MIN_HINT_HISTORY_SIZE, Math.min(MAX_HINT_HISTORY_SIZE, impostorCount * 4))
 
-const assignHintsForImpostors = (
-  word: SecretWord,
-  impostorIds: Set<string>,
-  state: GameState,
-): Record<string, string> => {
+function assignHintsForImpostors(word: SecretWord, impostorIds: Set<string>, state: GameState): Record<string, string> {
   if (impostorIds.size === 0) return {}
-
   const hints = uniqueRuntimeHints(word)
-  if (hints.length === 0) {
-    return Object.fromEntries([...impostorIds].map((id) => [id, '']))
-  }
+  if (hints.length === 0) return Object.fromEntries([...impostorIds].map((id) => [id, '']))
 
   const history = new Set(state.recentHintsHistory.map(normalizeHint))
   const assigned = new Set<string>()
-  const entries: Array<[string, string]> = []
+  const result: Record<string, string> = {}
 
-  const shuffledIds = [...impostorIds].sort(() => Math.random() - 0.5)
-  for (const id of shuffledIds) {
+  for (const id of shuffled([...impostorIds])) {
     const basePool = hints.filter((h) => !assigned.has(normalizeHint(h)))
     const freshPool = basePool.filter((h) => !history.has(normalizeHint(h)))
-
-    const selected =
-      freshPool[Math.floor(Math.random() * freshPool.length)] ??
-      basePool[Math.floor(Math.random() * basePool.length)] ??
-      hints[Math.floor(Math.random() * hints.length)]
-
+    const selected = randomOf(freshPool) ?? randomOf(basePool) ?? randomOf(hints)!
+    result[id] = selected
     assigned.add(normalizeHint(selected))
-    entries.push([id, selected])
   }
-
-  return Object.fromEntries(entries)
+  return result
 }
 
-const updateHintHistory = (state: GameState, hints: string[]): string[] => {
-  const additions = hints.map((h) => h.trim()).filter(Boolean)
+function updateHintHistory(state: GameState, usedHints: string[]): string[] {
+  const additions = usedHints.map((h) => h.trim()).filter(Boolean)
   if (additions.length === 0) return state.recentHintsHistory
   return [...state.recentHintsHistory, ...additions].slice(-historySizeFor(state.settings.impostorCount))
 }
 
-const pickImpostors = (players: Player[], impostorCount: number): Set<string> =>
-  new Set(players.slice().sort(() => Math.random() - 0.5).slice(0, impostorCount).map((p) => p.id))
+const pickImpostors = (state: GameState): Set<string> =>
+  new Set(shuffled(state.players).slice(0, state.settings.impostorCount).map((p) => p.id))
 
-export function startRound(
-  state: GameState,
-  wordsByCategory: Record<string, SecretWord[]>,
-): GameState {
+/** Losuje hasło i role; null gdy brak haseł w wybranych kategoriach. */
+function drawRound(state: GameState, wordsByCategory: Record<string, SecretWord[]>): GameState | null {
   const word = pickWord(state.selectedCategoryIds, state.usedWordIds, wordsByCategory)
-  if (!word) return state
-
-  const impostors = pickImpostors(state.players, state.settings.impostorCount)
+  if (!word) return null
+  const impostors = pickImpostors(state)
   const hints = assignHintsForImpostors(word, impostors, state)
-
   return {
     ...state,
     currentSecretWord: word,
@@ -107,85 +146,62 @@ export function startRound(
   }
 }
 
-export function goToNextRound(
-  state: GameState,
-  wordsByCategory: Record<string, SecretWord[]>,
-): GameState {
-  if (getWinners(state).length > 0) {
-    return { ...state, phase: 'GAME_OVER' }
-  }
-
-  const started = startRound({ ...state, roundNumber: state.roundNumber + 1, lastRoundResult: null }, wordsByCategory)
-  return started
+export function startRound(state: GameState, wordsByCategory: Record<string, SecretWord[]>): GameState {
+  return drawRound(state, wordsByCategory) ?? state
 }
 
-export function drawStartingPlayer(players: Player[]): Player | null {
-  if (players.length === 0) return null
-  return players[Math.floor(Math.random() * players.length)]
+// ── Odkrywanie ról ────────────────────────────────────────────────────────────
+
+export function revealAndContinue(state: GameState): GameState {
+  const next = state.currentRevealIndex + 1
+  return { ...state, currentRevealIndex: next, phase: next >= state.players.length ? 'READY_TO_START' : 'PASS_PHONE' }
 }
+
+/** Losuje gracza, który zaczyna rundę — może to być dowolny gracz (bez rotacji). */
+export function startGameRound(state: GameState): GameState {
+  return { ...state, startingPlayer: randomOf(state.players) ?? null, phase: 'GAME_ROUND' }
+}
+
+// ── Wyniki ────────────────────────────────────────────────────────────────────
 
 export function submitVotes(state: GameState, selected: Set<string>): GameState {
   if (!state.currentSecretWord) return state
   const { players, result } = scoreVotes(state.players, state.currentImpostorIds, selected, state.currentSecretWord)
-  return {
-    ...state,
-    players,
-    lastRoundResult: result,
-    phase: 'ROUND_RESULT',
-  }
+  return { ...state, players, lastRoundResult: result, phase: 'ROUND_RESULT' }
 }
 
-export function handleImpostorGuess(
-  state: GameState,
-  playerId: string,
-  isCorrect: boolean,
-): { nextState: GameState; accepted: boolean; error?: string } {
-  const player = state.players.find((p) => p.id === playerId)
-  if (!player) {
-    return { nextState: state, accepted: false, error: 'Nie znaleziono gracza.' }
-  }
-  if (!state.currentImpostorIds.has(playerId)) {
-    return {
-      nextState: state,
-      accepted: false,
-      error: `${player.name} nie jest Reproduktorem.`,
-    }
-  }
-  if (!state.currentSecretWord) {
-    return { nextState: state, accepted: false, error: 'Brak aktywnego hasła.' }
-  }
-
-  const { players, result } = scoreImpostorGuess(state.players, state.currentImpostorIds, playerId, isCorrect, state.currentSecretWord)
-  return {
-    accepted: true,
-    nextState: {
-      ...state,
-      players,
-      lastRoundResult: result,
-      phase: 'ROUND_RESULT',
-    },
-  }
+/** null = wybrany gracz nie jest Reproduktorem (UI pokazuje błąd). */
+export function handleImpostorGuess(state: GameState, playerId: string, isCorrect: boolean): GameState | null {
+  if (!state.players.some((p) => p.id === playerId)) return null
+  if (!state.currentImpostorIds.has(playerId) || !state.currentSecretWord) return null
+  const { players, result } = scoreImpostorGuess(
+    state.players,
+    state.currentImpostorIds,
+    playerId,
+    isCorrect,
+    state.currentSecretWord,
+  )
+  return { ...state, players, lastRoundResult: result, phase: 'ROUND_RESULT' }
 }
 
-export function getWinners(state: GameState): Player[] {
-  return state.players.filter((p) => p.score >= state.settings.pointsToWin)
+export const getWinners = (state: GameState): Player[] =>
+  state.players.filter((p) => p.score >= state.settings.pointsToWin)
+
+export function goToNextRound(state: GameState, wordsByCategory: Record<string, SecretWord[]>): GameState {
+  if (getWinners(state).length > 0) return { ...state, phase: 'GAME_OVER' }
+  const next = drawRound(state, wordsByCategory)
+  if (!next) return state
+  return { ...next, roundNumber: state.roundNumber + 1, lastRoundResult: null }
 }
 
-export function exitToStart(state: GameState): GameState {
-  return {
-    ...createInitialState(state.players.map((p) => ({ ...p, score: 0 })), state.settings),
-    selectedCategoryIds: new Set(state.selectedCategoryIds),
-  }
-}
+// ── Reset ─────────────────────────────────────────────────────────────────────
 
+/** „Zagraj ponownie” / „Nowa gra”: gracze zostają z zerowymi punktami, kategorie czyszczone. */
 export function resetGameKeepPlayers(state: GameState): GameState {
-  return createInitialState(state.players.map((p) => ({ ...p, score: 0 })), state.settings)
+  return { ...createInitialState(state.players.map((p) => ({ ...p, score: 0 }))), settings: state.settings }
 }
 
-export function resetEverything(): GameState {
-  return createInitialState()
-}
-
-export function updateStateWithRoundResult(state: GameState, result: RoundResult): GameState {
-  return { ...state, lastRoundResult: result, phase: 'ROUND_RESULT' }
+/** Wyjście z gry (✕): jak wyżej, ale zachowuje wybrane kategorie. */
+export function exitToStart(state: GameState): GameState {
+  return { ...resetGameKeepPlayers(state), selectedCategoryIds: new Set(state.selectedCategoryIds) }
 }

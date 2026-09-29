@@ -1,70 +1,62 @@
-﻿import { DarkCard } from '../components/DarkCard'
-import { PrimaryButton } from '../components/PrimaryButton'
-import { TopCornerActions } from '../components/TopCornerActions'
-import type { RoundResultScreenProps } from './types'
+// Odpowiednik RoundResultScreen.kt.
 
-const RESULT_EMOJI: Record<string, string> = {
+import { AppBackground, BottomBar, CloseButton, DarkCard, PrimaryButton, Spacer } from '../components/Basics'
+import { ScoreTable } from '../components/Dialogs'
+import { TopCornerActions } from '../components/TopCornerActions'
+import type { ResultType } from '../game/types'
+import type { ScreenProps } from './types'
+import { useExitGame } from './useExitGame'
+
+const RESULT_EMOJI: Record<ResultType, string> = {
   IMPOSTORS_CAUGHT: '👥🏆',
+  IMPOSTORS_PARTIALLY_CAUGHT: '👥🥷',
   IMPOSTORS_ESCAPED: '🥷🏆',
   IMPOSTOR_GUESSED_CORRECTLY: '🥷✅',
   IMPOSTOR_GUESSED_INCORRECTLY: '🥷❌',
 }
 
-export function RoundResultScreen({
-  theme,
-  themeKey,
-  onThemeChange,
-  onInfo,
-  state,
-  onNextRound,
-  onExit,
-}: RoundResultScreenProps) {
-  const result = state.lastRoundResult
-
-  if (!result) return null
+export function RoundResultScreen({ game, theme, onSelectTheme, openRules }: ScreenProps) {
+  const { players, lastRoundResult: result } = game.state
+  const { openExitDialog, exitDialog } = useExitGame(game)
 
   return (
-    <div className="screen">
-      <TopCornerActions
-        theme={theme}
-        selectedTheme={themeKey}
-        onSelectTheme={onThemeChange}
-        onInfoClick={onInfo}
-        side="start"
-      />
-      <button className="close-btn" onClick={onExit}>✕</button>
-
-      <section className="screen-scroll with-bottom-bar">
-        <h1 className="title">Wynik rundy</h1>
-        <p className="giant-emoji">{RESULT_EMOJI[result.resultType]}</p>
-        <p className="round-message">{result.resultMessage}</p>
-
-        <DarkCard theme={theme}>
-          <p className="hint-title">🔐 Tajne słowo</p>
-          <h2 className="secret-word">{result.secretWord.word}</h2>
-          <p className="hint-title">🥷 Reproduktorzy</p>
-          <p className="impostor-list">
-            {result.impostors.map((p) => `${p.avatarEmoji} ${p.name}`).join(', ')}
-          </p>
-        </DarkCard>
-
-        <DarkCard theme={theme}>
-          <h3>Tabela wyników</h3>
-          {state.players
-            .slice()
-            .sort((a, b) => b.score - a.score)
-            .map((p) => (
-              <div key={p.id} className="score-row">
-                <span>{p.avatarEmoji} {p.name}</span>
-                <strong>{p.score}</strong>
-              </div>
-            ))}
-        </DarkCard>
-      </section>
-
-      <footer className="bottom-bar" style={{ background: theme.gradientFrom, borderColor: theme.border }}>
-        <PrimaryButton theme={theme} onClick={onNextRound}>🔄 Następna runda</PrimaryButton>
-      </footer>
-    </div>
+    <AppBackground>
+      <div className="screen with-bottom-bar">
+        <div className="scroll-area pad-24 center-items">
+          <Spacer h={16} />
+          <h1 className="title-32">Wynik rundy</h1>
+          <Spacer h={24} />
+          {result && (
+            <>
+              <span className="emoji-64">{RESULT_EMOJI[result.resultType]}</span>
+              <Spacer h={12} />
+              <p className="result-message">{result.resultMessage}</p>
+              <Spacer h={20} />
+              <DarkCard className="full-width">
+                <p className="body-13 text-muted">🔐 Tajne słowo</p>
+                <p className="result-word">{result.secretWord.word}</p>
+                <Spacer h={12} />
+                <p className="body-13 text-muted">🥷 Reproduktorzy</p>
+                <p className="result-impostors">
+                  {result.impostors.map((p) => `${p.avatarEmoji} ${p.name}`).join(', ')}
+                </p>
+              </DarkCard>
+              <Spacer h={16} />
+              <DarkCard className="full-width">
+                <h3 className="card-heading">Tabela wyników</h3>
+                <ScoreTable players={players} pointsDelta={result.pointsDelta} showAvatars />
+              </DarkCard>
+            </>
+          )}
+          <Spacer h={16} />
+        </div>
+        <TopCornerActions side="start" theme={theme} onSelectTheme={onSelectTheme} onInfoClick={() => openRules()} />
+        <CloseButton onClick={openExitDialog} />
+        <BottomBar>
+          <PrimaryButton onClick={game.goToNextRound}>🔄 Następna runda</PrimaryButton>
+        </BottomBar>
+      </div>
+      {exitDialog}
+    </AppBackground>
   )
 }

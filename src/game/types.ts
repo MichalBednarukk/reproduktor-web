@@ -1,4 +1,6 @@
-﻿export type GamePhase =
+// Modele 1:1 z Androida: app/src/main/java/com/example/reproduktor/data/model/
+
+export type GamePhase =
   | 'SETUP_PLAYERS'
   | 'SETUP_CATEGORIES'
   | 'SETUP_SETTINGS'
@@ -42,6 +44,7 @@ export type GameSettings = {
 
 export type ResultType =
   | 'IMPOSTORS_CAUGHT'
+  | 'IMPOSTORS_PARTIALLY_CAUGHT'
   | 'IMPOSTORS_ESCAPED'
   | 'IMPOSTOR_GUESSED_CORRECTLY'
   | 'IMPOSTOR_GUESSED_INCORRECTLY'
@@ -82,26 +85,6 @@ export type WordsPayload = {
       }>
     }
   >
-}
-
-export type AppThemeKey = 'classic' | 'pride' | 'forest'
-
-export type AppTheme = {
-  key: AppThemeKey
-  name: string
-  gradientFrom: string
-  gradientTo: string
-  card: string
-  cardLight: string
-  border: string
-  text: string
-  textSecondary: string
-  textMuted: string
-  primary: string
-  secondary: string
-  success: string
-  warning: string
-  error: string
 }
 
 export const DEFAULT_SETTINGS: GameSettings = {

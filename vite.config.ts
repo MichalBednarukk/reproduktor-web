@@ -1,16 +1,20 @@
-﻿import { defineConfig } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  // Zmien na '/<nazwa-repozytorium>/' jezeli repo na GitHub ma inna nazwe niz reproduktor-web.
+  // Strona jest publikowana na GitHub Pages pod /reproduktor-web/ (repo MichalBednarukk/reproduktor-web).
+  // Przy zmianie nazwy repo lub adresu trzeba zmienić tę ścieżkę.
   base: '/reproduktor-web/',
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon-192.png', 'icon-512.png'],
-      manifest: false,
+      manifest: false, // używamy public/manifest.json
+      workbox: {
+        // Baza haseł (.json) i ikony też trafiają do cache — gra działa offline.
+        globPatterns: ['**/*.{js,css,html,json,png,svg}'],
+      },
     }),
   ],
 })

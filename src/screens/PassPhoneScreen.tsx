@@ -1,22 +1,43 @@
-﻿import { DarkCard } from '../components/DarkCard'
-import { PrimaryButton } from '../components/PrimaryButton'
-import type { PassPhoneScreenProps } from './types'
+// Odpowiednik PassPhoneScreen.kt.
 
-export function PassPhoneScreen({ state, theme, onConfirm, onExit }: PassPhoneScreenProps) {
-  const current = state.players[state.currentRevealIndex]
+import { AppBackground, CloseButton, DarkCard, PrimaryButton, Spacer } from '../components/Basics'
+import { AutoResizeText } from '../components/AutoResizeText'
+import type { ScreenProps } from './types'
+import { useExitGame } from './useExitGame'
+
+export function PassPhoneScreen({ game }: ScreenProps) {
+  const { players, currentRevealIndex } = game.state
+  const current = players[currentRevealIndex]
+  const { openExitDialog, exitDialog } = useExitGame(game)
 
   return (
-    <div className="screen center-screen">
-      <button className="close-btn" onClick={onExit}>✕</button>
-      <div className="center-content">
-        <p className="giant-emoji">{current?.avatarEmoji ?? '📱'}</p>
-        <DarkCard theme={theme} className="center-card">
-          <p className="subtitle">Przekaż telefon do</p>
-          <h2 className="fit-name">{current?.name ?? '?'}</h2>
-          <p className="hint">Gracz {state.currentRevealIndex + 1} z {state.players.length}</p>
-        </DarkCard>
-        <PrimaryButton theme={theme} onClick={onConfirm}>Kontynuuj</PrimaryButton>
+    <AppBackground>
+      <div className="screen">
+        <div className="centered-column pad-32">
+          <span className="emoji-88">{current?.avatarEmoji ?? '📱'}</span>
+          <Spacer h={20} />
+          <DarkCard padding={24} radius={28} className="full-width">
+            <p className="body-16 text-secondary center">Przekaż telefon do</p>
+            <Spacer h={12} />
+            <AutoResizeText
+              text={current?.name.trim() ?? '?'}
+              maxFontSize={38}
+              minFontSize={20}
+              maxLines={2}
+              lineHeightMultiplier={1.2}
+              className="name-text"
+            />
+            <Spacer h={10} />
+            <p className="body-13 text-muted center ellipsis">
+              Gracz {currentRevealIndex + 1} z {players.length}
+            </p>
+          </DarkCard>
+          <Spacer h={32} />
+          <PrimaryButton onClick={game.confirmPassPhone}>Kontynuuj</PrimaryButton>
+        </div>
+        <CloseButton onClick={openExitDialog} />
       </div>
-    </div>
+      {exitDialog}
+    </AppBackground>
   )
 }

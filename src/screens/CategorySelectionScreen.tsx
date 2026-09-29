@@ -1,82 +1,87 @@
-﻿import { PrimaryButton } from '../components/PrimaryButton'
+// Odpowiednik CategorySelectionScreen.kt.
+
+import { AppBackground, BackArrow, BottomBar, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
 import { TopCornerActions } from '../components/TopCornerActions'
-import type { CategoryScreenProps } from './types'
+import { useBackHandler } from '../navigation/backHandler'
+import type { ScreenProps } from './types'
 
-export function CategorySelectionScreen({
-  theme,
-  themeKey,
-  onThemeChange,
-  onInfo,
-  state,
-  categories,
-  onToggle,
-  onSelectAll,
-  onClearAll,
-  onBack,
-  onNext,
-}: CategoryScreenProps) {
-  const allIds = new Set(categories.map((c) => c.id))
-  const allSelected = categories.length > 0 && state.selectedCategoryIds.size === categories.length
-  const selectedCount = state.selectedCategoryIds.size
+export function CategorySelectionScreen({ game, theme, onSelectTheme, openRules }: ScreenProps) {
+  const { categories, wordsStatus } = game
+  const selectedIds = game.state.selectedCategoryIds
+  const selectedCount = selectedIds.size
+  const isAllSelected =
+    categories.length > 0 && selectedCount === categories.length && categories.every((c) => selectedIds.has(c.id))
 
-  const buttonText =
-    selectedCount === 0
-      ? 'Wybierz kategorię'
-      : allSelected
-        ? 'Dalej • wszystkie kategorie'
-        : selectedCount === 1
-          ? 'Dalej • 1 kategoria'
-          : selectedCount <= 4
-            ? `Dalej • ${selectedCount} kategorie`
-            : `Dalej • ${selectedCount} kategorii`
+  useBackHandler(game.goToPlayers)
+
+  let buttonText: string
+  if (selectedCount === 0) buttonText = 'Wybierz kategorię'
+  else if (isAllSelected) buttonText = 'Dalej • wszystkie kategorie'
+  else if (selectedCount === 1) buttonText = 'Dalej • 1 kategoria'
+  else if (selectedCount <= 4) buttonText = `Dalej • ${selectedCount} kategorie`
+  else buttonText = `Dalej • ${selectedCount} kategorii`
 
   return (
-    <div className="screen">
-      <TopCornerActions theme={theme} selectedTheme={themeKey} onSelectTheme={onThemeChange} onInfoClick={onInfo} />
-
-      <section className="screen-scroll with-bottom-bar">
-        <div className="title-row">
-          <button className="back-btn" onClick={onBack}>←</button>
-          <h1 className="title">🗂️ Kategorie</h1>
-        </div>
-        <p className="subtitle">Wybierz co najmniej jedną kategorię</p>
-
-        <button
-          className={`category-card ${allSelected ? 'selected' : ''}`}
-          style={{ borderColor: allSelected ? theme.secondary : theme.border, background: allSelected ? `${theme.secondary}22` : theme.card }}
-          onClick={() => (allSelected ? onClearAll() : onSelectAll())}
-        >
-          <div>
-            <strong>Wszystko</strong>
-            <p>Losuj hasła ze wszystkich kategorii.</p>
+    <AppBackground>
+      <div className="screen with-bottom-bar">
+        <div className="scroll-area pad-24">
+          <Spacer h={16} />
+          <div className="title-row">
+            <BackArrow onClick={game.goToPlayers} />
+            <h1 className="title-34">🗂️ Kategorie</h1>
           </div>
-          <span>🎲</span>
-        </button>
+          <p className="body-15 text-secondary">Wybierz co najmniej jedną kategorię</p>
+          <Spacer h={24} />
 
-        {categories.map((category) => {
-          const selected = state.selectedCategoryIds.has(category.id)
-          return (
-            <button
-              key={category.id}
-              className={`category-card ${selected ? 'selected' : ''}`}
-              style={{ borderColor: selected ? theme.secondary : theme.border, background: selected ? `${theme.primary}22` : theme.card }}
-              onClick={() => onToggle(category.id)}
-            >
-              <div>
-                <strong>{category.name}</strong>
-                <p>{category.description}</p>
-              </div>
-              <span>{category.emoji}</span>
-            </button>
-          )
-        })}
-      </section>
+          {wordsStatus === 'loading' && <p className="body-15 text-muted center">Wczytywanie haseł…</p>}
+          {wordsStatus === 'error' && (
+            <div className="words-error">
+              <p className="body-15 text-secondary center">Nie udało się wczytać bazy haseł.</p>
+              <Spacer h={12} />
+              <SecondaryButton onClick={game.retryWords}>Spróbuj ponownie</SecondaryButton>
+            </div>
+          )}
 
-      <footer className="bottom-bar" style={{ background: theme.gradientFrom, borderColor: theme.border }}>
-        <PrimaryButton theme={theme} disabled={state.selectedCategoryIds.size === 0 || ![...state.selectedCategoryIds].every((id) => allIds.has(id))} onClick={onNext}>
-          {buttonText}
-        </PrimaryButton>
-      </footer>
-    </div>
+          {wordsStatus === 'ready' && (
+            <>
+              <button
+                type="button"
+                className={`category-card all ${isAllSelected ? 'selected' : ''}`}
+                onClick={isAllSelected ? game.clearAllCategories : game.selectAllCategories}
+              >
+                <span className="category-text">
+                  <span className="category-name">Wszystko</span>
+                  <span className="category-description">Losuj hasła ze wszystkich kategorii.</span>
+                </span>
+                <span className="category-emoji">🎲</span>
+              </button>
+              <Spacer h={12} />
+              {categories.map((category) => (
+                <div key={category.id}>
+                  <button
+                    type="button"
+                    className={`category-card ${selectedIds.has(category.id) ? 'selected' : ''}`}
+                    onClick={() => game.toggleCategory(category.id)}
+                  >
+                    <span className="category-text">
+                      <span className="category-name">{category.name}</span>
+                      {category.description && <span className="category-description">{category.description}</span>}
+                    </span>
+                    <span className="category-emoji">{category.emoji}</span>
+                  </button>
+                  <Spacer h={12} />
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+        <TopCornerActions side="end" theme={theme} onSelectTheme={onSelectTheme} onInfoClick={() => openRules()} />
+        <BottomBar variant="translucent">
+          <PrimaryButton disabled={selectedCount === 0} onClick={game.goToSettings}>
+            {buttonText}
+          </PrimaryButton>
+        </BottomBar>
+      </div>
+    </AppBackground>
   )
 }

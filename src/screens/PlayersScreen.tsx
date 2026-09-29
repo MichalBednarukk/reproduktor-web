@@ -1,101 +1,132 @@
-﻿import { useMemo, useState } from 'react'
-import { DarkCard } from '../components/DarkCard'
-import { PrimaryButton } from '../components/PrimaryButton'
-import { SecondaryButton } from '../components/SecondaryButton'
+// Odpowiednik PlayersScreen.kt.
+
+import { useState } from 'react'
+import { AppBackground, BottomBar, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
+import { AlertDialog } from '../components/Dialogs'
 import { TopCornerActions } from '../components/TopCornerActions'
-import type { PlayersScreenProps } from './types'
+import { MAX_PLAYER_NAME_LENGTH, MAX_PLAYERS, MIN_PLAYERS } from '../game/gameEngine'
+import type { ScreenProps } from './types'
 
-const MAX_PLAYER_NAME_LENGTH = 30
+export function PlayersScreen({ game, theme, onSelectTheme, openRules }: ScreenProps) {
+  const { players } = game.state
+  const [inputText, setInputText] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
+  const [showRemoveAll, setShowRemoveAll] = useState(false)
 
-export function PlayersScreen({
-  theme,
-  themeKey,
-  onThemeChange,
-  onInfo,
-  state,
-  onAddPlayer,
-  onRemovePlayer,
-  onRemoveAllPlayers,
-  onNext,
-}: PlayersScreenProps) {
-  const [name, setName] = useState('')
-  const [error, setError] = useState('')
-
-  const canGoNext = state.players.length >= 3
-  const reversedPlayers = useMemo(() => state.players.slice().reverse(), [state.players])
-
-  const submit = () => {
-    const result = onAddPlayer(name)
-    if (!result.ok) {
-      setError(result.message ?? 'Nie można dodać gracza')
+  const tryAdd = () => {
+    const cleaned = inputText.trim()
+    if (cleaned.length > MAX_PLAYER_NAME_LENGTH) {
+      setErrorMsg(`Imię może mieć maksymalnie ${MAX_PLAYER_NAME_LENGTH} znaków`)
       return
     }
-    setName('')
-    setError('')
+    if (game.addPlayer(cleaned)) {
+      setInputText('')
+      setErrorMsg('')
+      return
+    }
+    if (!cleaned) setErrorMsg('Wpisz imię gracza')
+    else if (players.some((p) => p.name.toLocaleLowerCase() === cleaned.toLocaleLowerCase()))
+      setErrorMsg('Gracz o tym imieniu już istnieje')
+    else if (players.length >= MAX_PLAYERS) setErrorMsg(`Maksymalnie ${MAX_PLAYERS} graczy`)
+    else setErrorMsg('Nie można dodać gracza')
   }
 
+  const canContinue = players.length >= MIN_PLAYERS
+
   return (
-    <div className="screen">
-      <TopCornerActions theme={theme} selectedTheme={themeKey} onSelectTheme={onThemeChange} onInfoClick={onInfo} />
-
-      <section className="screen-scroll with-bottom-bar">
-        <h1 className="title">🎮 Gracze</h1>
-        <p className="subtitle">Kto gra dzisiaj?</p>
-
-        {state.players.length > 0 && (
-          <button className="danger-link" onClick={onRemoveAllPlayers}>
-            Usuń wszystkich
-          </button>
-        )}
-
-        <DarkCard theme={theme}>
-          <div className="row">
-            <input
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value.slice(0, MAX_PLAYER_NAME_LENGTH))
-                setError('')
-              }}
-              placeholder="Wpisz imię gracza"
-            />
-            <button className="plus-btn" style={{ background: theme.primary }} onClick={submit}>
-              +
-            </button>
-          </div>
-        </DarkCard>
-
-        <p className="counter" style={{ color: theme.textMuted }}>
-          {name.length}/{MAX_PLAYER_NAME_LENGTH} znaków
-        </p>
-
-        {error && (
-          <p className="error" style={{ color: theme.error }}>
-            {error}
-          </p>
-        )}
-
-        <div className="list">
-          {reversedPlayers.map((player) => (
-            <DarkCard key={player.id} theme={theme} className="player-card">
-              <span className="avatar">{player.avatarEmoji}</span>
-              <span className="player-name">{player.name}</span>
-              <button className="ghost-btn" onClick={() => onRemovePlayer(player.id)}>
-                ✕
+    <AppBackground>
+      <div className="screen with-bottom-bar">
+        <div className="scroll-area pad-24">
+          <Spacer h={16} />
+          <div className="players-header">
+            <div className="players-title">
+              <h1 className="title-36 ellipsis">🎮 Gracze</h1>
+              <p className="body-15 text-secondary">Kto gra dzisiaj?</p>
+            </div>
+            {players.length > 0 && (
+              <button type="button" className="text-btn remove-all" onClick={() => setShowRemoveAll(true)}>
+                Usuń wszystkich
               </button>
-            </DarkCard>
-          ))}
+            )}
+          </div>
+          <Spacer h={20} />
+          <DarkCard padding={12} radius={20}>
+            <form
+              className="player-input-row"
+              onSubmit={(e) => {
+                e.preventDefault()
+                tryAdd()
+              }}
+            >
+              <input
+                className="player-input"
+                value={inputText}
+                maxLength={MAX_PLAYER_NAME_LENGTH}
+                placeholder="Wpisz imię gracza"
+                enterKeyHint="done"
+                autoComplete="off"
+                onChange={(e) => {
+                  setInputText(e.target.value.slice(0, MAX_PLAYER_NAME_LENGTH))
+                  setErrorMsg('')
+                }}
+              />
+              <button type="submit" className="add-btn" aria-label="Dodaj gracza">
+                +
+              </button>
+            </form>
+          </DarkCard>
+          <p className="char-counter">
+            {inputText.length}/{MAX_PLAYER_NAME_LENGTH} znaków
+          </p>
+          {errorMsg && <p className="input-error">{errorMsg}</p>}
+          <Spacer h={16} />
+          {players
+            .slice()
+            .reverse()
+            .map((player) => (
+              <DarkCard key={player.id} padding={4} radius={20} className="player-card">
+                <div className="player-row">
+                  <span className="player-avatar">{player.avatarEmoji}</span>
+                  <span className="player-name">{player.name}</span>
+                  <button
+                    type="button"
+                    className="icon-btn remove-player"
+                    onClick={() => game.removePlayer(player.id)}
+                    aria-label={`Usuń ${player.name}`}
+                  >
+                    ✕
+                  </button>
+                </div>
+              </DarkCard>
+            ))}
+          <Spacer h={16} />
         </div>
-      </section>
-
-      <footer className="bottom-bar" style={{ background: theme.gradientFrom, borderColor: theme.border }}>
-        {!canGoNext && <p className="hint">Dodaj co najmniej 3 graczy, aby kontynuować</p>}
-        <PrimaryButton theme={theme} disabled={!canGoNext} onClick={onNext}>
-          Dalej →
-        </PrimaryButton>
-        <SecondaryButton theme={theme} onClick={onInfo}>
-          Zasady gry
-        </SecondaryButton>
-      </footer>
-    </div>
+        <TopCornerActions side="end" theme={theme} onSelectTheme={onSelectTheme} onInfoClick={() => openRules()} />
+        <BottomBar>
+          {!canContinue && <p className="bottom-hint">Dodaj co najmniej {MIN_PLAYERS} graczy, aby kontynuować</p>}
+          <PrimaryButton disabled={!canContinue} onClick={game.goToCategories}>
+            Dalej →
+          </PrimaryButton>
+          <Spacer h={10} />
+          <SecondaryButton onClick={() => openRules()}>Zasady gry</SecondaryButton>
+        </BottomBar>
+      </div>
+      {showRemoveAll && (
+        <AlertDialog
+          title="Usunąć wszystkich graczy?"
+          text="Ta akcja usunie całą listę graczy z tego urządzenia."
+          confirm={{
+            text: 'Usuń',
+            color: 'var(--error)',
+            onClick: () => {
+              setShowRemoveAll(false)
+              game.removeAllPlayers()
+            },
+          }}
+          dismiss={{ text: 'Anuluj', onClick: () => setShowRemoveAll(false) }}
+          onDismissRequest={() => setShowRemoveAll(false)}
+        />
+      )}
+    </AppBackground>
   )
 }
