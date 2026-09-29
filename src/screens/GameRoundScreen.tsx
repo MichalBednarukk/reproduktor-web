@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import type { AvatarMood } from '../avatars/characters'
 import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AppBackground, CloseButton, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
 import { AlertDialog, ExitGameDialog, ImpostorGuessDialog, PlayerPickerDialog, ScoreTable } from '../components/Dialogs'
@@ -16,6 +17,29 @@ import type { ScreenProps } from './types'
 type RoundDialog = 'none' | 'scoreTable' | 'forceEnd' | 'exitGame' | 'endRoundConfirm' | 'rolePicker'
 
 const STARTER_BANNER_MS = 10_000
+
+const PARTY_MOODS: AvatarMood[] = ['happy', 'sneaky', 'caught', 'win', 'sad', 'idle']
+const PARTY_INTERVAL_MS = 3000
+
+const randomMoods = (players: Player[]): Record<string, AvatarMood> =>
+  Object.fromEntries(players.map((p) => [p.id, PARTY_MOODS[Math.floor(Math.random() * PARTY_MOODS.length)]]))
+
+/** Wszyscy gracze w wolnym miejscu rundy — co 3 s każdy dostaje losową reakcję (niezależnie od ról). */
+function PlayersParty({ players }: { players: Player[] }) {
+  const [moods, setMoods] = useState(() => randomMoods(players))
+  useEffect(() => {
+    const handle = window.setInterval(() => setMoods(randomMoods(players)), PARTY_INTERVAL_MS)
+    return () => window.clearInterval(handle)
+  }, [players])
+  const size = players.length <= 4 ? 100 : players.length <= 6 ? 84 : players.length <= 9 ? 70 : 60
+  return (
+    <div className="avatar-row party">
+      {players.map((p) => (
+        <PlayerAvatar key={p.id} avatar={p.avatarEmoji} size={size} mood={moods[p.id] ?? 'idle'} />
+      ))}
+    </div>
+  )
+}
 
 export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: ScreenProps) {
   const { state, timerSeconds } = game
@@ -97,7 +121,7 @@ export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: Scree
               )}
             </div>
           </div>
-          <div className="flex-1" />
+          <div className="flex-1 party-space">{!showStarterBanner && <PlayersParty players={state.players} />}</div>
           <PrimaryButton onClick={game.openImpostorGuess}>🥷 Reproduktor zgaduje</PrimaryButton>
           <Spacer h={10} />
           <SecondaryButton onClick={() => openDialog('endRoundConfirm')}>🗳️ Zakończ rundę i głosuj</SecondaryButton>

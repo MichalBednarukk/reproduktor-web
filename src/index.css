@@ -2014,3 +2014,19 @@ button:disabled {
   justify-content: center;
   background: var(--bg);
 }
+
+/* Tłum graczy w wolnym miejscu rundy (losowe reakcje co 3 s) */
+.party-space {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 12px 0;
+}
+
+.avatar-row.party {
+  align-items: flex-end;
+  gap: 12px 14px;
+  animation: fade-in 400ms ease-out;
+}
