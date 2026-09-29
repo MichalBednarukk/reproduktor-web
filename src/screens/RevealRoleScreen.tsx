@@ -59,10 +59,12 @@ type PeekRevealProps = {
   hintsEnabled: boolean
   isAdvancing: boolean
   onExitGame: () => void
+  continueLabel?: string
   onContinue: () => void
 }
 
-function PeekReveal(props: PeekRevealProps) {
+/** Zasłona z rolą — używana przy odkrywaniu ról i przy „Moja rola” w trakcie rundy. */
+export function PeekReveal(props: PeekRevealProps) {
   const { isImpostor, word, hint, hintsEnabled, isAdvancing } = props
   const rootRef = useRef<HTMLDivElement>(null)
   const readableRef = useRef<HTMLDivElement>(null)
@@ -215,7 +217,7 @@ function PeekReveal(props: PeekRevealProps) {
               <p className="body-14 text-secondary center">Możesz teraz przekazać telefon.</p>
               <Spacer h={32} />
               <PrimaryButton onClick={props.onContinue} disabled={isAdvancing}>
-                Kontynuuj →
+                {props.continueLabel ?? 'Kontynuuj →'}
               </PrimaryButton>
             </div>
           ) : (

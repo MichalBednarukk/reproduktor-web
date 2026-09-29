@@ -3,14 +3,17 @@
 // Dialog wyjścia (✕) NIE pauzuje timera — tak jak na Androidzie.
 
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { PlayerAvatar } from '../avatars/PlayerAvatar'
 import { AppBackground, CloseButton, DarkCard, PrimaryButton, SecondaryButton, Spacer } from '../components/Basics'
-import { AlertDialog, ExitGameDialog, ImpostorGuessDialog, ScoreTable } from '../components/Dialogs'
+import { AlertDialog, ExitGameDialog, ImpostorGuessDialog, PlayerPickerDialog, ScoreTable } from '../components/Dialogs'
 import { TopCornerActions } from '../components/TopCornerActions'
-import { useBackHandler } from '../navigation/backHandler'
+import type { Player } from '../game/types'
+import { BACK_PRIORITY_DIALOG, useBackHandler } from '../navigation/backHandler'
+import { PeekReveal } from './RevealRoleScreen'
 import type { ScreenProps } from './types'
 
-type RoundDialog = 'none' | 'scoreTable' | 'forceEnd' | 'exitGame' | 'endRoundConfirm'
+type RoundDialog = 'none' | 'scoreTable' | 'forceEnd' | 'exitGame' | 'endRoundConfirm' | 'rolePicker'
 
 const STARTER_BANNER_MS = 10_000
 
@@ -18,6 +21,13 @@ export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: Scree
   const { state, timerSeconds } = game
   const guessOpen = state.phase === 'IMPOSTOR_GUESS'
   const [activeDialog, setActiveDialog] = useState<RoundDialog>('none')
+  // „Moja rola”: gracz wybiera siebie i podgląda rolę pod zasłoną (timer stoi).
+  const [checkingPlayer, setCheckingPlayer] = useState<Player | null>(null)
+  const closeRoleCheck = () => {
+    setCheckingPlayer(null)
+    if (state.phase === 'GAME_ROUND') game.resumeTimer()
+  }
+  useBackHandler(closeRoleCheck, checkingPlayer !== null, BACK_PRIORITY_DIALOG)
 
   // Baner startującego gracza — znika po 10 s, wraca przy nowej rundzie.
   const bannerKey = `${state.roundNumber}:${state.startingPlayer?.id ?? ''}`
@@ -29,7 +39,7 @@ export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: Scree
   }, [bannerKey])
 
   const openDialog = (dialog: RoundDialog) => {
-    if (dialog === 'scoreTable' || dialog === 'forceEnd' || dialog === 'endRoundConfirm') game.pauseTimer()
+    if (dialog === 'scoreTable' || dialog === 'forceEnd' || dialog === 'endRoundConfirm' || dialog === 'rolePicker') game.pauseTimer()
     setActiveDialog(dialog)
   }
 
@@ -96,6 +106,9 @@ export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: Scree
             <button type="button" className="small-outline" onClick={() => openDialog('scoreTable')}>
               📊 Tabela
             </button>
+            <button type="button" className="small-outline" onClick={() => openDialog('rolePicker')}>
+              👁 Moja rola
+            </button>
             <button type="button" className="small-outline danger" onClick={() => openDialog('forceEnd')}>
               🏁 Koniec
             </button>
@@ -130,6 +143,41 @@ export function GameRoundScreen({ game, theme, onSelectTheme, openRules }: Scree
           dismissText="← Wróć do gry"
         />
       )}
+
+      {activeDialog === 'rolePicker' && (
+        <PlayerPickerDialog
+          title="👁 Kto sprawdza rolę?"
+          subtitle="Wybierz siebie. Pozostali niech nie patrzą na ekran."
+          players={state.players}
+          onPick={(player) => {
+            setActiveDialog('none')
+            setCheckingPlayer(player)
+          }}
+          onDismiss={closeAndResume}
+        />
+      )}
+
+      {checkingPlayer &&
+        createPortal(
+          <div className="role-check-overlay">
+            <PeekReveal
+              key={checkingPlayer.id}
+              playerName={checkingPlayer.name}
+              avatar={checkingPlayer.avatarEmoji}
+              playerIdx={state.players.findIndex((p) => p.id === checkingPlayer.id) + 1}
+              playerCount={state.players.length}
+              isImpostor={state.currentImpostorIds.has(checkingPlayer.id)}
+              word={state.currentSecretWord?.word ?? '?'}
+              hint={state.currentImpostorHints[checkingPlayer.id] ?? ''}
+              hintsEnabled={state.settings.hintsEnabled}
+              isAdvancing={false}
+              onExitGame={closeRoleCheck}
+              onContinue={closeRoleCheck}
+              continueLabel="← Wróć do gry"
+            />
+          </div>,
+          document.body,
+        )}
 
       {activeDialog === 'scoreTable' && (
         <AlertDialog

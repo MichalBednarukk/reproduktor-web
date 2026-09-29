@@ -142,6 +142,42 @@ export function ImpostorGuessDialog({ players, onGuessResult, onDismiss, dismiss
   )
 }
 
+type PlayerPickerDialogProps = {
+  title: string
+  subtitle: string
+  players: Player[]
+  onPick: (player: Player) => void
+  onDismiss: () => void
+  dismissText?: string
+}
+
+/** Wybór gracza z listy (np. „Kto sprawdza rolę?”). Stuknięcie od razu wybiera. */
+export function PlayerPickerDialog({ title, subtitle, players, onPick, onDismiss, dismissText = '← Wróć do gry' }: PlayerPickerDialogProps) {
+  return (
+    <DialogShell onDismiss={onDismiss} className="guess-dialog">
+      <div className="guess-header">
+        <h2>{title}</h2>
+        <p>{subtitle}</p>
+      </div>
+      <div className="guess-list">
+        {players.map((player) => (
+          <button type="button" key={player.id} className="guess-item" onClick={() => onPick(player)}>
+            <span className="guess-avatar">
+              <PlayerAvatar avatar={player.avatarEmoji} size={48} />
+            </span>
+            <span className="guess-name">{player.name}</span>
+          </button>
+        ))}
+      </div>
+      <div className="guess-footer">
+        <button type="button" className="text-btn guess-dismiss" onClick={onDismiss}>
+          {dismissText}
+        </button>
+      </div>
+    </DialogShell>
+  )
+}
+
 type ScoreTableProps = {
   players: Player[]
   pointsDelta?: Record<string, number>

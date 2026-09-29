@@ -2004,3 +2004,13 @@ button:disabled {
   line-height: 18px;
   color: var(--muted);
 }
+
+/* „Moja rola” w trakcie rundy — zasłona z rolą na całym ekranie */
+.role-check-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  justify-content: center;
+  background: var(--bg);
+}
