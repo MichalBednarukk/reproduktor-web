@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<g id="avatar">
+<g id="shadow">
+<ellipse cx="256" cy="476" rx="140" ry="15" fill="#07080F"></ellipse>
+</g>
+<g id="body">
+<g id="arm_L">
+<path d="M168 300 L110 300 Q90 300 90 280 L90 236" fill="none" stroke="#F4EEFF" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M168 300 L110 300 Q90 300 90 280 L90 236" fill="none" stroke="#2A1740" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M168 300 L110 300 Q90 300 90 280 L90 236" fill="none" stroke="#34D6B0" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M90 256 L78 250" fill="none" stroke="#F4EEFF" stroke-width="4" stroke-linecap="round"></path>
+<circle id="pivot_arm_L" cx="168" cy="300" r="1" fill="none"></circle>
+</g>
+<g id="arm_R">
+<g id="accessory">
+<path d="M422 262 L422 200" fill="none" stroke="#F4EEFF" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M422 262 L422 200" fill="none" stroke="#2A1740" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M422 262 L422 200" fill="none" stroke="#1FA88E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="422" cy="172" r="15" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="16" stroke-linejoin="round"></circle>
+<circle cx="437" cy="183" r="15" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="16" stroke-linejoin="round"></circle>
+<circle cx="431" cy="201" r="15" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="16" stroke-linejoin="round"></circle>
+<circle cx="413" cy="201" r="15" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="16" stroke-linejoin="round"></circle>
+<circle cx="407" cy="183" r="15" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="16" stroke-linejoin="round"></circle>
+<circle cx="422" cy="172" r="15" fill="#FF6B9A" stroke="#2A1740" stroke-width="5" stroke-linejoin="round"></circle>
+<circle cx="437" cy="183" r="15" fill="#FF6B9A" stroke="#2A1740" stroke-width="5" stroke-linejoin="round"></circle>
+<circle cx="431" cy="201" r="15" fill="#FF6B9A" stroke="#2A1740" stroke-width="5" stroke-linejoin="round"></circle>
+<circle cx="413" cy="201" r="15" fill="#FF6B9A" stroke="#2A1740" stroke-width="5" stroke-linejoin="round"></circle>
+<circle cx="407" cy="183" r="15" fill="#FF6B9A" stroke="#2A1740" stroke-width="5" stroke-linejoin="round"></circle>
+<circle cx="422" cy="188" r="9" fill="#FFD166" stroke="#2A1740" stroke-width="5"></circle>
+<circle id="pivot_accessory" cx="422" cy="262" r="1" fill="none"></circle>
+</g>
+<path d="M344 320 L402 320 Q422 320 422 300 L422 262" fill="none" stroke="#F4EEFF" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M344 320 L402 320 Q422 320 422 300 L422 262" fill="none" stroke="#2A1740" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M344 320 L402 320 Q422 320 422 300 L422 262" fill="none" stroke="#34D6B0" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M422 290 L434 284" fill="none" stroke="#F4EEFF" stroke-width="4" stroke-linecap="round"></path>
+<circle id="pivot_arm_R" cx="344" cy="320" r="1" fill="none"></circle>
+</g>
+<g id="head">
+<rect x="146" y="110" width="220" height="300" rx="110" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="26" stroke-linejoin="round"></rect>
+<rect x="146" y="110" width="220" height="300" rx="110" fill="#34D6B0"></rect>
+<path d="M320 124 Q366 150 366 220 L366 404 L324 404 Q348 300 320 124 Z" fill="#22B894"></path>
+<ellipse cx="182" cy="190" rx="12" ry="26" fill="#8FF0D4"></ellipse>
+<rect x="146" y="110" width="220" height="300" rx="110" fill="none" stroke="#2A1740" stroke-width="7"></rect>
+<g id="spikes">
+<path d="M160 236 L148 230" fill="none" stroke="#F4EEFF" stroke-width="5" stroke-linecap="round"></path>
+<path d="M158 350 L146 346" fill="none" stroke="#F4EEFF" stroke-width="5" stroke-linecap="round"></path>
+<path d="M352 240 L364 234" fill="none" stroke="#F4EEFF" stroke-width="5" stroke-linecap="round"></path>
+<path d="M354 350 L366 346" fill="none" stroke="#F4EEFF" stroke-width="5" stroke-linecap="round"></path>
+</g>
+<g id="sunglasses">
+<rect x="176" y="126" width="70" height="42" rx="16" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="16"></rect>
+<rect x="266" y="126" width="70" height="42" rx="16" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="16"></rect>
+<path d="M244 146 Q256 136 268 146" fill="none" stroke="#2A1740" stroke-width="8" stroke-linecap="round"></path>
+<rect x="176" y="126" width="70" height="42" rx="16" fill="#1A0F2E" stroke="#FF6B9A" stroke-width="7"></rect>
+<rect x="266" y="126" width="70" height="42" rx="16" fill="#1A0F2E" stroke="#FF6B9A" stroke-width="7"></rect>
+<path d="M190 142 L208 135" fill="none" stroke="#F4EEFF" stroke-width="6" stroke-linecap="round"></path>
+<path d="M280 142 L298 135" fill="none" stroke="#F4EEFF" stroke-width="6" stroke-linecap="round"></path>
+</g>
+<ellipse cx="176" cy="322" rx="18" ry="10" fill="#FF8FB1"></ellipse>
+<ellipse cx="336" cy="322" rx="18" ry="10" fill="#FF8FB1"></ellipse>
+<g id="eye_L"><ellipse cx="208" cy="256" rx="40" ry="46" fill="#FFFFFF" stroke="#2A1740" stroke-width="7"></ellipse></g>
+<g id="eye_R"><ellipse cx="304" cy="256" rx="40" ry="46" fill="#FFFFFF" stroke="#2A1740" stroke-width="7"></ellipse></g>
+<g id="pupil_L">
+<circle cx="214" cy="262" r="22" fill="#7C5CFF"></circle>
+<circle cx="214" cy="262" r="12" fill="#1A0F2E"></circle>
+<circle cx="206" cy="253" r="7" fill="#FFFFFF"></circle>
+</g>
+<g id="pupil_R">
+<circle cx="298" cy="262" r="22" fill="#7C5CFF"></circle>
+<circle cx="298" cy="262" r="12" fill="#1A0F2E"></circle>
+<circle cx="290" cy="253" r="7" fill="#FFFFFF"></circle>
+</g>
+<g id="eyelid_L" display="none">
+<ellipse cx="208" cy="256" rx="40" ry="46" fill="#22B894" stroke="#2A1740" stroke-width="7"></ellipse>
+<path d="M172 280 Q208 296 244 280" fill="none" stroke="#2A1740" stroke-width="6" stroke-linecap="round"></path>
+<circle id="pivot_eyelid_L" cx="208" cy="210" r="1" fill="none"></circle>
+</g>
+<g id="eyelid_R" display="none">
+<ellipse cx="304" cy="256" rx="40" ry="46" fill="#22B894" stroke="#2A1740" stroke-width="7"></ellipse>
+<path d="M268 280 Q304 296 340 280" fill="none" stroke="#2A1740" stroke-width="6" stroke-linecap="round"></path>
+<circle id="pivot_eyelid_R" cx="304" cy="210" r="1" fill="none"></circle>
+</g>
+<g id="brow_L">
+<g id="brow_L_idle"><path d="M174 198 Q198 182 230 192" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+<g id="brow_L_angry" display="none"><path d="M176 184 L234 204" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+<g id="brow_L_worried" display="none"><path d="M176 200 Q204 196 232 180" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+</g>
+<g id="brow_R">
+<g id="brow_R_idle"><path d="M282 188 Q312 174 338 190" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+<g id="brow_R_angry" display="none"><path d="M278 204 L336 184" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+<g id="brow_R_worried" display="none"><path d="M280 180 Q308 196 336 200" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+</g>
+<g id="mouths">
+<g id="mouth_idle">
+<path d="M220 320 Q258 344 296 312" fill="none" stroke="#2A1740" stroke-width="8" stroke-linecap="round"></path>
+<path d="M291 304 Q302 308 302 318" fill="none" stroke="#2A1740" stroke-width="6" stroke-linecap="round"></path>
+</g>
+<g id="mouth_happy" display="none">
+<path d="M212 312 Q256 320 300 312 Q296 364 256 366 Q216 364 212 312 Z" fill="#5A1E3A" stroke="#2A1740" stroke-width="7" stroke-linejoin="round"></path>
+<path d="M234 354 Q256 340 278 354 Q268 364 256 364 Q244 364 234 354 Z" fill="#FF6B9A"></path>
+</g>
+<g id="mouth_sneaky" display="none">
+<path d="M226 330 Q266 336 298 304" fill="none" stroke="#2A1740" stroke-width="8" stroke-linecap="round"></path>
+<path d="M288 316 L296 328 L302 312 Z" fill="#FFFFFF" stroke="#2A1740" stroke-width="4" stroke-linejoin="round"></path>
+</g>
+<g id="mouth_caught" display="none">
+<ellipse cx="256" cy="338" rx="21" ry="29" fill="#5A1E3A" stroke="#2A1740" stroke-width="7"></ellipse>
+<ellipse cx="256" cy="354" rx="11" ry="7" fill="#FF6B9A"></ellipse>
+</g>
+<g id="mouth_win" display="none">
+<path d="M206 304 Q256 296 306 304 Q302 378 256 380 Q210 378 206 304 Z" fill="#5A1E3A" stroke="#2A1740" stroke-width="7" stroke-linejoin="round"></path>
+<path d="M218 307 Q256 301 294 307 L292 320 Q256 315 220 320 Z" fill="#FFFFFF"></path>
+<path d="M230 366 Q256 348 282 366 Q270 377 256 377 Q242 377 230 366 Z" fill="#FF6B9A"></path>
+</g>
+<g id="mouth_sad" display="none">
+<path d="M224 342 Q256 314 288 342" fill="none" stroke="#2A1740" stroke-width="8" stroke-linecap="round"></path>
+</g>
+</g>
+<circle id="pivot_head" cx="256" cy="392" r="1" fill="none"></circle>
+</g>
+<g id="pot">
+<path d="M144 414 L368 414 L350 468 L162 468 Z" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="26" stroke-linejoin="round"></path>
+<rect x="128" y="390" width="256" height="32" rx="12" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="22" stroke-linejoin="round"></rect>
+<path d="M144 414 L368 414 L350 468 L162 468 Z" fill="#FFD166"></path>
+<path d="M300 414 L368 414 L350 468 L296 468 Z" fill="#E3A83C"></path>
+<path d="M144 414 L368 414 L350 468 L162 468 Z" fill="none" stroke="#2A1740" stroke-width="7" stroke-linejoin="round"></path>
+<rect x="128" y="390" width="256" height="32" rx="12" fill="#FFE09A" stroke="#2A1740" stroke-width="7" stroke-linejoin="round"></rect>
+</g>
+<circle id="pivot_body" cx="256" cy="470" r="1" fill="none"></circle>
+</g>
+<g id="fx"></g>
+</g>
+</svg>

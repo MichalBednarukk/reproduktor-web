@@ -108,6 +108,7 @@
 </g>
 <circle id="pivot_head" cx="256" cy="446" r="1" fill="none"></circle>
 </g>
+<g id="arm_R">
 <g id="accessory">
 <g id="fork_rim">
 <rect x="417" y="148" width="9" height="50" rx="4.5" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="16"></rect>
@@ -129,7 +130,6 @@
 <circle cx="440" cy="208" r="8" fill="#FF6B9A" stroke="#2A1740" stroke-width="4"></circle>
 <circle id="pivot_accessory" cx="440" cy="334" r="1" fill="none"></circle>
 </g>
-<g id="arm_R">
 <path d="M406 376 Q434 368 440 334" fill="none" stroke="#F4EEFF" stroke-width="46" stroke-linecap="round"></path>
 <path d="M406 376 Q434 368 440 334" fill="none" stroke="#2A1740" stroke-width="36" stroke-linecap="round"></path>
 <path d="M406 376 Q434 368 440 334" fill="none" stroke="#FFDFA8" stroke-width="22" stroke-linecap="round"></path>

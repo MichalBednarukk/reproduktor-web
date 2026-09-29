@@ -28,4 +28,4 @@ export const FACES: Record<AvatarMood, Face> = {
 }
 
 /** Kadr postaci w układzie 512×512 (kwadrat obejmujący sylwetkę i cień). */
-export const CHARACTER_VIEWBOX = { x: 36, y: 66, size: 440 }
+export const CHARACTER_VIEWBOX = { x: 28, y: 46, size: 456 }

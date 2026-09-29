@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<g id="avatar">
+<g id="shadow">
+<ellipse cx="256" cy="476" rx="150" ry="15" fill="#07080F"></ellipse>
+</g>
+<g id="body">
+<g id="feet">
+<ellipse cx="180" cy="458" rx="28" ry="13" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="22" stroke-linejoin="round"></ellipse>
+<ellipse cx="332" cy="458" rx="28" ry="13" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="22" stroke-linejoin="round"></ellipse>
+<ellipse cx="180" cy="458" rx="28" ry="13" fill="#3B2A63" stroke="#2A1740" stroke-width="7" stroke-linejoin="round"></ellipse>
+<ellipse cx="332" cy="458" rx="28" ry="13" fill="#3B2A63" stroke="#2A1740" stroke-width="7" stroke-linejoin="round"></ellipse>
+</g>
+<g id="arm_L">
+<path d="M126 352 Q86 334 78 290" fill="none" stroke="#F4EEFF" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M126 352 Q86 334 78 290" fill="none" stroke="#2A1740" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M126 352 Q86 334 78 290" fill="none" stroke="#C9CDE3" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="78" cy="288" r="17" fill="#FFFFFF" stroke="#2A1740" stroke-width="6"></circle>
+<circle id="pivot_arm_L" cx="126" cy="352" r="1" fill="none"></circle>
+</g>
+<g id="head">
+<g id="toasts">
+<path d="M150 236 L148 150 Q144 108 194 108 Q244 108 240 150 L238 236 Z" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="26" stroke-linejoin="round"></path>
+<path d="M362 236 L364 150 Q368 108 318 108 Q268 108 272 150 L274 236 Z" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="26" stroke-linejoin="round"></path>
+<path d="M150 236 L148 150 Q144 108 194 108 Q244 108 240 150 L238 236 Z" fill="#D98A3D" stroke="#2A1740" stroke-width="7" stroke-linejoin="round"></path>
+<path d="M362 236 L364 150 Q368 108 318 108 Q268 108 272 150 L274 236 Z" fill="#D98A3D" stroke="#2A1740" stroke-width="7" stroke-linejoin="round"></path>
+<path d="M164 236 L162 156 Q160 126 194 126 Q228 126 226 156 L224 236 Z" fill="#F5C27A"></path>
+<path d="M348 236 L350 156 Q352 126 318 126 Q284 126 286 156 L288 236 Z" fill="#F5C27A"></path>
+</g>
+<rect x="116" y="206" width="280" height="240" rx="56" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="26" stroke-linejoin="round"></rect>
+<rect x="116" y="206" width="280" height="240" rx="56" fill="#FF6B9A"></rect>
+<path d="M340 206 Q396 206 396 262 L396 390 Q396 446 340 446 L320 446 Q352 330 340 206 Z" fill="#E04F80"></path>
+<rect x="138" y="232" width="16" height="110" rx="8" fill="#FF9DBC"></rect>
+<rect x="116" y="206" width="280" height="240" rx="56" fill="none" stroke="#2A1740" stroke-width="7"></rect>
+<rect x="144" y="214" width="100" height="12" rx="6" fill="#2A1740"></rect>
+<rect x="268" y="214" width="100" height="12" rx="6" fill="#2A1740"></rect>
+<ellipse cx="160" cy="362" rx="22" ry="12" fill="#FFB3CB"></ellipse>
+<ellipse cx="352" cy="362" rx="22" ry="12" fill="#FFB3CB"></ellipse>
+<g id="eye_L"><ellipse cx="208" cy="300" rx="40" ry="46" fill="#FFFFFF" stroke="#2A1740" stroke-width="7"></ellipse></g>
+<g id="eye_R"><ellipse cx="304" cy="300" rx="40" ry="46" fill="#FFFFFF" stroke="#2A1740" stroke-width="7"></ellipse></g>
+<g id="pupil_L">
+<circle cx="214" cy="306" r="22" fill="#7C5CFF"></circle>
+<circle cx="214" cy="306" r="12" fill="#1A0F2E"></circle>
+<circle cx="206" cy="297" r="7" fill="#FFFFFF"></circle>
+</g>
+<g id="pupil_R">
+<circle cx="298" cy="306" r="22" fill="#7C5CFF"></circle>
+<circle cx="298" cy="306" r="12" fill="#1A0F2E"></circle>
+<circle cx="290" cy="297" r="7" fill="#FFFFFF"></circle>
+</g>
+<g id="eyelid_L" display="none">
+<ellipse cx="208" cy="300" rx="40" ry="46" fill="#E04F80" stroke="#2A1740" stroke-width="7"></ellipse>
+<path d="M172 324 Q208 340 244 324" fill="none" stroke="#2A1740" stroke-width="6" stroke-linecap="round"></path>
+<circle id="pivot_eyelid_L" cx="208" cy="254" r="1" fill="none"></circle>
+</g>
+<g id="eyelid_R" display="none">
+<ellipse cx="304" cy="300" rx="40" ry="46" fill="#E04F80" stroke="#2A1740" stroke-width="7"></ellipse>
+<path d="M268 324 Q304 340 340 324" fill="none" stroke="#2A1740" stroke-width="6" stroke-linecap="round"></path>
+<circle id="pivot_eyelid_R" cx="304" cy="254" r="1" fill="none"></circle>
+</g>
+<g id="brow_L">
+<g id="brow_L_idle"><path d="M174 242 Q198 226 230 236" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+<g id="brow_L_angry" display="none"><path d="M176 228 L234 248" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+<g id="brow_L_worried" display="none"><path d="M176 244 Q204 240 232 224" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+</g>
+<g id="brow_R">
+<g id="brow_R_idle"><path d="M282 232 Q312 218 338 234" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+<g id="brow_R_angry" display="none"><path d="M278 248 L336 228" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+<g id="brow_R_worried" display="none"><path d="M280 224 Q308 240 336 244" fill="none" stroke="#2A1740" stroke-width="11" stroke-linecap="round"></path></g>
+</g>
+<g id="mouths">
+<g id="mouth_idle">
+<path d="M220 364 Q258 388 296 356" fill="none" stroke="#2A1740" stroke-width="8" stroke-linecap="round"></path>
+<path d="M291 348 Q302 352 302 362" fill="none" stroke="#2A1740" stroke-width="6" stroke-linecap="round"></path>
+</g>
+<g id="mouth_happy" display="none">
+<path d="M212 356 Q256 364 300 356 Q296 408 256 410 Q216 408 212 356 Z" fill="#5A1E3A" stroke="#2A1740" stroke-width="7" stroke-linejoin="round"></path>
+<path d="M234 398 Q256 384 278 398 Q268 408 256 408 Q244 408 234 398 Z" fill="#FF6B9A"></path>
+</g>
+<g id="mouth_sneaky" display="none">
+<path d="M226 374 Q266 380 298 348" fill="none" stroke="#2A1740" stroke-width="8" stroke-linecap="round"></path>
+<path d="M288 360 L296 372 L302 356 Z" fill="#FFFFFF" stroke="#2A1740" stroke-width="4" stroke-linejoin="round"></path>
+</g>
+<g id="mouth_caught" display="none">
+<ellipse cx="256" cy="382" rx="21" ry="29" fill="#5A1E3A" stroke="#2A1740" stroke-width="7"></ellipse>
+<ellipse cx="256" cy="398" rx="11" ry="7" fill="#FF6B9A"></ellipse>
+</g>
+<g id="mouth_win" display="none">
+<path d="M206 348 Q256 340 306 348 Q302 422 256 424 Q210 422 206 348 Z" fill="#5A1E3A" stroke="#2A1740" stroke-width="7" stroke-linejoin="round"></path>
+<path d="M218 351 Q256 345 294 351 L292 364 Q256 359 220 364 Z" fill="#FFFFFF"></path>
+<path d="M230 410 Q256 392 282 410 Q270 421 256 421 Q242 421 230 410 Z" fill="#FF6B9A"></path>
+</g>
+<g id="mouth_sad" display="none">
+<path d="M224 386 Q256 358 288 386" fill="none" stroke="#2A1740" stroke-width="8" stroke-linecap="round"></path>
+</g>
+</g>
+<circle id="pivot_head" cx="256" cy="446" r="1" fill="none"></circle>
+</g>
+<g id="arm_R">
+<g id="accessory">
+<path d="M424 276 L424 196 Q424 174 446 168 L446 276 Z" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="16" stroke-linejoin="round"></path>
+<rect x="426" y="268" width="18" height="50" rx="8" fill="#F4EEFF" stroke="#F4EEFF" stroke-width="16" stroke-linejoin="round"></rect>
+<path d="M424 276 L424 196 Q424 174 446 168 L446 276 Z" fill="#D9DDF0" stroke="#2A1740" stroke-width="6" stroke-linejoin="round"></path>
+<rect x="420" y="190" width="30" height="20" rx="6" fill="#FFD166" stroke="#2A1740" stroke-width="5" stroke-linejoin="round"></rect>
+<rect x="426" y="268" width="18" height="50" rx="8" fill="#7C5CFF" stroke="#2A1740" stroke-width="6" stroke-linejoin="round"></rect>
+<circle id="pivot_accessory" cx="434" cy="290" r="1" fill="none"></circle>
+</g>
+<path d="M386 352 Q426 334 434 290" fill="none" stroke="#F4EEFF" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M386 352 Q426 334 434 290" fill="none" stroke="#2A1740" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M386 352 Q426 334 434 290" fill="none" stroke="#C9CDE3" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="434" cy="288" r="17" fill="#FFFFFF" stroke="#2A1740" stroke-width="6"></circle>
+<circle id="pivot_arm_R" cx="386" cy="352" r="1" fill="none"></circle>
+</g>
+<circle id="pivot_body" cx="256" cy="470" r="1" fill="none"></circle>
+</g>
+<g id="fx"></g>
+</g>
+</svg>
